@@ -1,0 +1,16 @@
+../Core/Src/GPS.c:79:6:vGPS_eInit	1
+../Core/Src/GPS.c:117:6:vGPS_eStartGPS_Exe	2
+../Core/Src/GPS.c:143:6:bGPS_eGetGPSPowerStatus_Exe	4
+../Core/Src/GPS.c:179:6:vGPS_eSetGPSPower_Exe	4
+../Core/Src/GPS.c:211:6:vGPS_eReadGPSData_Exe	2
+../Core/Src/GPS.c:240:6:bGPS_eGetGGAData_Exe	6
+../Core/Src/GPS.c:322:6:bGPS_eGetRMCData_Exe	5
+../Core/Src/GPS.c:366:13:vGPS_iReadRMCSpeed_Exe	3
+../Core/Src/GPS.c:401:13:vGPS_iReadRMCHeading_Exe	2
+../Core/Src/GPS.c:436:6:bGPS_eGetGSAData_Exe	5
+../Core/Src/GPS.c:486:6:vGPS_eConvertMin2Deg_Exe	2
+../Core/Src/GPS.c:513:13:vGPS_iResetGPS_Exe	2
+../Core/Src/GPS.c:537:6:vGPS_eConfigAGPS_Exe	6
+../Core/Src/GPS.c:577:6:vGPS_eEnableAGPS_Exe	1
+../Core/Src/GPS.c:592:6:vGPS_eStoreEphemerisData_Exe	1
+../Core/Src/GPS.c:609:6:bGPS_eGetGPSLoc_Exe	13

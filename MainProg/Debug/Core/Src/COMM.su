@@ -1,0 +1,8 @@
+../Core/Src/COMM.c:28:6:MX_TIM16_Init	8	static
+../Core/Src/COMM.c:55:6:vCOMM_eUSART1Init	8	static
+../Core/Src/COMM.c:103:6:vCOMM_eUSART3Init	8	static
+../Core/Src/COMM.c:151:6:MX_I2C1_Init	8	static
+../Core/Src/COMM.c:204:6:vCOMM_eTxString_Exe	40	static
+../Core/Src/COMM.c:258:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/COMM.c:285:6:HAL_UART_TxCpltCallback	16	static
+../Core/Src/COMM.c:300:6:HAL_UART_ErrorCallback	16	static

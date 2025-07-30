@@ -1,0 +1,2 @@
+../Core/Src/CONFIG_EEPROM.c:38:6:vCONFIGEEPROM_eReadConfigData_Exe	24	static
+../Core/Src/CONFIG_EEPROM.c:74:6:vCONFIGEEPROM_eLoadDefaultPar_Exe	48	static

@@ -1,0 +1,592 @@
+/*
+ * APP.c
+ *
+ *  Created on: Mar 1, 2025
+ *      Author: 700538
+ */
+#include "main.h"
+#include "APP.h"
+#include "ADC.h"
+#include "CAN.h"
+#include "COMM.h"
+#include "GSM.h"
+#include "GPS.h"
+#include "GEN.h"
+
+#include <string.h>
+#include <stdlib.h>
+
+/*Function Prototypes*/
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin);
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin);
+static void vAPP_iReadLiveData_Exe(void);
+static void vAPP_iSendLiveModeData_Exe(void);
+static bool bAPP_iSendDataOverSocket_Exe(char *cDataBuff);
+void vAPP_eWriteMsgCntrInEEPROM_Exe(void);
+static void vAPP_iReadIgnStatus_Exe(void);
+void SystemClock_Config(void);
+static void MX_IWDG_Init(void);
+void vAPP_eFeedTheWDT_Exe(void);
+static void vAPP_iInit(void);
+void MX_TIM2_Init(void);
+//static void vAPP_iReadOTAFrmSMS_Exe(void);
+
+/*Buffers*/
+char cAPP_eGlobalBuffer[200];
+char cAPP_eGPSDataBuffer[900]; // increased buffer size from 300 to 900 in order to add other parameters into the buffer
+
+/*Handles*/
+IWDG_HandleTypeDef hiwdg;
+TIM_HandleTypeDef htim2;
+
+/*Structures*/
+TsAPP_eTimer TIMERData;
+TsAPP APPData;
+TsAPP_eConfig APPCONFIG;
+extern TsUARTData UARTData;
+extern TsGPS GPSData;
+extern TsGSMHealth GSMHealth;
+extern TsGSMData GSMData;
+//extern TsOTAData OTAData;
+extern TsBATTData BATTData;
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  vAPP_iInit();
+  HAL_GPIO_WritePin(MCU_LED_GPIO_Port, MCU_LED_Pin, GPIO_PIN_SET);
+  TIMERData.uiLEDCntr = 0;
+
+  MX_IWDG_Init();
+  vAPP_eFeedTheWDT_Exe();
+
+  vADC_eInit();
+  vCAN_eInit();
+
+  vGSM_eInit();
+  vGPS_eInit();
+
+  GSM_RxCntr = 0;
+  GSM_TimeOut = 0;
+
+  vAPP_eFeedTheWDT_Exe();
+  vGSM_ePowerONGSM_Exe();
+  vGSM_eStartGSM_Exe();
+
+  vGSM_eInitaliseGSM_Exe();
+  vGPS_eStartGPS_Exe();
+
+  GSM_RxCntr = 0;
+  GSM_TimeOut = 0;
+
+  vGEN_eLoadTxRate_Exe();
+  vAPP_iReadIgnStatus_Exe();  //DONE 2025
+  APPData.bIgnStatusPrev = APPData.bIgnStatus;
+
+  TIMERData.ul30SecCntr = 0;
+  TIMERData.ul18SecCntr = 0;
+  TIMERData.ulHeartBeatTimer = 0;
+
+  while (1)
+  {
+    /* USER CODE END WHILE */
+		vAPP_eFeedTheWDT_Exe();
+
+		if (GSMHealth.bGSMReady == GSM_READY)
+		{
+			//-----------------------------------
+			// LIVE DATA
+			//-----------------------------------
+			// Send / Store Live Data if Transmit Rate is completed
+			if (TIMERData.ulPresentTxRate >= TIMERData.ulTxRate)
+			{
+				vAPP_iSendLiveModeData_Exe();
+				TIMERData.ulPresentTxRate = 0;
+				vGEN_eLoadTxRate_Exe();
+			}
+			if (APPData.bIgnStatus != APPData.bIgnStatusPrev)
+			{
+				vGEN_eLoadTxRate_Exe();
+			}
+		}
+
+		else
+		{
+			vGSM_eStartGSM_Exe();
+		}
+
+		if (TIMERData.ul18SecCntr > 18000)
+		{
+			TIMERData.ul18SecCntr = 0;
+//			vAPP_iReadOTAFrmSMS_Exe();
+		}
+
+		if (TIMERData.ul30SecCntr > 30000)
+		{
+			TIMERData.ul30SecCntr = 0;
+
+			if ((GSMHealth.bSIMInsertStatus == SIM_NOT_INSERTED) || (GSMHealth.ucNoSocketCntr > 10) || (GSMHealth.ucNoResponseCntr > 10) ||
+				(GSMHealth.bGSMNetworkRegStatus == NETWORK_REGISTRATION_FAILED) ||
+				(GSMHealth.bGPRSNetworkRegStatus == NETWORK_REGISTRATION_FAILED) ||
+				(GSMHealth.ucGSMRebootRequired == 1))
+			{
+				vGSM_eReStartGSM_Exe();
+				GSMHealth.ucGSMRebootRequired = 0;
+			}
+		}
+
+		if (GSMHealth.bRIDetected == TRUE)
+		{
+			do
+			{
+				HAL_Delay(200);
+			} while ((GSM_RxCntr < 6) && (GSM_TimeOut < 150000));
+			vGSM_eReadURCData_Exe();
+
+			GSMHealth.bRIDetected = FALSE;
+		}
+
+		if (TIMERData.uiLEDCntr > 200)
+		{
+			HAL_GPIO_TogglePin(MCU_LED_GPIO_Port, MCU_LED_Pin);
+			TIMERData.uiLEDCntr = 0;
+		}
+		else
+		{
+			;
+		}
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+// ============================================================================
+// Name		: vAPP_iReadOTAFrmSMS_Exe
+// Objective	: Read OTA Command from SMS
+// Input  		: none
+// Output 	: none
+// Return		: none
+// Author		: AK
+// Date		: 24-12-2021
+// ============================================================================
+/*static void vAPP_iReadOTAFrmSMS_Exe(void)
+{
+	bool bResp;
+
+	bResp = bOTA_eReadOTACommandFromSMS_Exe(SM_SMS_STORAGE);
+	if (bResp == TRUE)
+	{
+		if (OTAData.ucOTACmdStatus[SMS_OTA_CMD] == SMS_OTA_COMMAND_AVAILABLE)
+		{
+			// OTA from SMS
+			bOTA_eExecuteOTACmd_Exe(SMS_OTA_CMD);
+		}
+		else
+		{
+			;
+		}
+	}
+	else
+	{
+		;
+	}
+
+	bResp = bOTA_eReadOTACommandFromSMS_Exe(ME_SMS_STORAGE);
+	if (bResp == TRUE)
+	{
+		if (OTAData.ucOTACmdStatus[SMS_OTA_CMD] == SMS_OTA_COMMAND_AVAILABLE)
+		{
+			// OTA from SMS
+			bOTA_eExecuteOTACmd_Exe(SMS_OTA_CMD);
+		}
+		else
+		{
+			;
+		}
+	}
+	else
+	{
+		;
+	}
+}*/
+
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == IGN_IN_Pin)
+	{
+		vAPP_iReadIgnStatus_Exe();
+
+		for (int iCntr = 0; iCntr < 10000; iCntr++)
+		{
+		 	;
+		}
+	}
+
+	if (GPIO_Pin == GSM_RI_IN_Pin)
+	{
+		if (GSMHealth.uiRITimer > 110) // 120mS pulse
+		{
+			GSMHealth.bRIDetected = TRUE;
+		}
+	}
+}
+
+/**
+ * @brief  EXTI line detection callback.
+ * @param  GPIO_Pin Specifies the port pin connected to corresponding EXTI line.
+ * @retval None
+ */
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == IGN_IN_Pin)
+	{
+		APPData.bIgnStatus = OFF;
+
+		for (int iCntr = 0; iCntr < 10000; iCntr++)
+		{
+			;
+		}
+	}
+
+	if (GPIO_Pin == GSM_RI_IN_Pin)
+	{
+		GSMHealth.uiRITimer = 0;
+	}
+}
+
+// ============================================================================
+// Name		: vAPP_iReadLiveModeData_Exe
+// Objective	: Read Live Mode Data
+// Input  		: Data Type :
+//			  0 - Location Data
+//			  1 onwards  - Event data
+// Output 	: none
+// Return		: 0 - DATA_SENT_FAIL / ERROR
+//		  	1 - DATA_SENT
+// Version	: -
+// Author	: AK
+// Date		: 15-12-2021
+// ============================================================================
+static void vAPP_iReadLiveData_Exe(void)
+{
+	bool bResp;
+
+	vGPS_eReadGPSData_Exe();
+	bResp = bGSM_eReadRTC_Exe(TIMERData.cRTC);
+	TIMERData.bRTCStatus = bResp;
+
+	vAPP_iReadIgnStatus_Exe();
+	ucGSM_eReadSignalStrength_Exe();
+}
+
+// ============================================================================
+// Name		: bAPP_eSendLiveModeData_Exe
+// Objective	: Send Live Mode Data
+// Input  		: none
+// Output 	: none
+// Return		: 0 - DATA_SENT_FAIL / ERROR
+//		 	 1 - DATA_SENT
+// Version	: -
+// Author		: AK
+// Date		: 15-12-2021
+// ============================================================================
+static void vAPP_iSendLiveModeData_Exe(void)
+{
+	bool bResp;
+
+	vAPP_iReadLiveData_Exe();
+
+	memset(cAPP_eGPSDataBuffer, 0, sizeof(cAPP_eGPSDataBuffer));
+
+	/*  vGEN_eParseData_Exe(cAPP_eGPSDataBuffer);               //269
+  vGEN_eParseData_Exe1(cAPP_eGPSDataBuffer);                      //187
+	  vGEN_eParseData_Exe2(cAPP_eGPSDataBuffer);                  //139
+  vGEN_eParseData_Exe3(cAPP_eGPSDataBuffer);               //164
+  vGEN_eParseData_Exe4(cAPP_eGPSDataBuffer);              //86
+	*/
+	vGEN_eLoadAndParseData_Exe(cAPP_eGPSDataBuffer);
+
+	// Fragmentation logic
+	/* size_t dataLen = strlen(cDataBuff);
+	 size_t chunkSize = 512; // Assuming a 512-byte chunk size, adjust as needed
+	 size_t offset = 0;
+
+	 while (offset < dataLen) {
+		 size_t bytesToSend = dataLen - offset;
+		 if (bytesToSend > chunkSize) {
+			 bytesToSend = chunkSize;
+		 }
+	 }
+
+   bResp = bAPP_iSendDataOverSocket_Exe(cDataBuff + offset, bytesToSend);*/
+
+	bResp = bAPP_iSendDataOverSocket_Exe(cAPP_eGPSDataBuffer);
+	if (bResp == TRUE)
+	{
+		APPData.uiMsgCntr++;
+	}
+	else
+	{
+		;
+	}
+}
+
+// ============================================================================
+// Name		: bAPP_iSendDataOverSocket_Exe
+// Objective	: Send Data over Socket
+// Input  		: Parse data buufer pointer
+// Output 	: none
+// Return		: Data Sent Status 0 - Not Sent, 1 - Data Sent
+// Version	: -
+// Author		: AK
+// Date		: 31-01-2022
+// ============================================================================
+static bool bAPP_iSendDataOverSocket_Exe(char *cDataBuff)
+{
+	bool bStatus;
+	uint8_t ucTry = 0;
+	uint16_t uiLen;
+
+	ucTry = 0;
+	bStatus = FALSE;
+	do
+	{
+		vGSM_eCheckAndMakeSocket_Exe();
+		if (GSMHealth.bSocketStatus == SOCKET_ACTIVE)
+		{
+			uiLen = strlen(cDataBuff);
+			bStatus = bGSM_eSendDataOnSocket_Exe(uiLen, cDataBuff);
+		}
+		else
+		{
+			;
+		}
+		ucTry++;
+	} while ((bStatus == FALSE) && (ucTry < 3));
+
+	if (bStatus == FALSE)
+	{
+		vGSM_eCloseSocket_Exe();
+		vGSM_eCheckAndMakeSocket_Exe();
+		if (GSMHealth.bSocketStatus == SOCKET_ACTIVE)
+		{
+			uiLen = strlen(cDataBuff);
+			bStatus = bGSM_eSendDataOnSocket_Exe(uiLen, cDataBuff);
+		}
+		else
+		{
+			;
+		}
+	}
+	else
+	{
+		GSMHealth.ucNoResponseCntr = 0;
+		GSMHealth.ucErrorCntr = 0;
+		GSMHealth.ucNoSocketCntr = 0;
+
+//		vAPP_eWriteMsgCntrInEEPROM_Exe();
+	}
+
+	return bStatus;
+}
+
+// ============================================================================
+// Name		: vAPP_eWriteMsgCntr_Exe
+// Objective	: Write Message Counter in EEPROM
+// Input  		: None
+// Output 	: none
+// Return		: None
+// Version	: -
+// Author		: AK
+// Date		: 30-01-2022
+// ============================================================================
+void vAPP_eWriteMsgCntrInEEPROM_Exe(void)
+{
+//	vEEPROM_eWriteByte_Exe(EEPROM_ADDR_MSGCOUNTER, (APPData.uiMsgCntr >> 8)); // Write Upper 8 Bit
+//	vEEPROM_eWriteByte_Exe(EEPROM_ADDR_MSGCOUNTER + 1, APPData.uiMsgCntr);	  // Write Lower 8 Bit
+}
+
+static void vAPP_iReadIgnStatus_Exe(void)
+{
+	APPData.bIgnStatus = HAL_GPIO_ReadPin(IGN_IN_GPIO_Port, IGN_IN_Pin);
+}
+
+
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
+  RCC_OscInitStruct.PLL.PLLN = 8;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+static void MX_IWDG_Init(void)
+{
+
+  /* USER CODE BEGIN IWDG_Init 0 */
+
+  /* USER CODE END IWDG_Init 0 */
+
+  /* USER CODE BEGIN IWDG_Init 1 */
+
+  /* USER CODE END IWDG_Init 1 */
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_64;
+  hiwdg.Init.Window = 4095;
+  hiwdg.Init.Reload = 4095;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN IWDG_Init 2 */
+
+  /* USER CODE END IWDG_Init 2 */
+
+}
+
+void vAPP_eFeedTheWDT_Exe(void)
+{
+	HAL_IWDG_Refresh(&hiwdg);
+}
+
+static void vAPP_iInit(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	// GPIO Ports Clock Enable
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+//	__HAL_RCC_GPIOD_CLK_ENABLE();
+
+	// Configure GPIO pin Output Level
+	HAL_GPIO_WritePin(MCU_LED_GPIO_Port, MCU_LED_Pin, GPIO_PIN_RESET);
+
+	// Configure GPIO pins : MCU_LED_Pin
+	GPIO_InitStruct.Pin = MCU_LED_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(MCU_LED_GPIO_Port, &GPIO_InitStruct);
+
+	// Configure GPIO pins : IGN_INP_Pin
+	GPIO_InitStruct.Pin = IGN_IN_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(IGN_IN_GPIO_Port, &GPIO_InitStruct);
+
+	  /* EXTI interrupt init*/
+	  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);
+	  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
+
+	  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+	  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
+
+void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 64-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1000-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 10;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */

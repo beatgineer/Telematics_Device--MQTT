@@ -1,0 +1,3 @@
+To publish message on MQTT : mosquitto_pub -h 13.235.101.231 -t test -m "hello world" -u RovoSync -P Yt7rt4hgTVhfY
+
+To receive message on MQTT :mosquitto_sub -h 13.235.101.231 -t rev25 -u RovoSync -P Yt7rt4hgTVhfY

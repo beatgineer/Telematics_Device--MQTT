@@ -1,0 +1,6 @@
+../Core/Src/UTL.c:107:7:pucUTL_eSearchCharInBytes_Exe	32	static
+../Core/Src/UTL.c:143:7:pucUTL_eSearchChar_Exe	32	static
+../Core/Src/UTL.c:173:6:vUTL_eClearBuffer_Exe	24	static
+../Core/Src/UTL.c:195:9:ucUTL_eCalculateCheckSum_Exe	24	static
+../Core/Src/UTL.c:229:6:bUTL_eCompareData_Exe	32	static
+../Core/Src/UTL.c:383:9:ucUTL_eHexChar2ASCIIChar_Exe	16	static

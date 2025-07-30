@@ -1,0 +1,2 @@
+../Core/Src/CONFIG_EEPROM.c:38:6:vCONFIGEEPROM_eReadConfigData_Exe	2
+../Core/Src/CONFIG_EEPROM.c:74:6:vCONFIGEEPROM_eLoadDefaultPar_Exe	1

@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "app.h": "c",
+        "stdio.h": "c",
+        "stm32g0xx_hal.h": "c",
+        "stdbool.h": "c",
+        "stm32g0xx_hal_conf.h": "c",
+        "stm32g0xx_hal_flash_ex.h": "c",
+        "stm32g0xx_hal_flash.h": "c",
+        "stdlib.h": "c"
+    }
+}

@@ -1,0 +1,120 @@
+// ============================================================================
+// FTP.h
+// Author : AK
+// Date   : 10-04-2014
+// ============================================================================
+
+#ifndef __FTP_H
+#define __FTP_H
+
+#include "stm32g0xx_hal.h"
+#include "stm32g0xx.h"
+#include <stdbool.h>
+
+#define FW_UPDATE_HRS_MIN		0x12U
+#define FW_UPDATE_HRS_MAX		0x13U
+
+#define CANID_IMMOM_FW_UPDATE	0x300
+
+typedef enum
+{
+ 	FTP_CLUSTER_ROOT_FOLDER 	= 0,// 0
+	FTP_CLUSTER_VERSION_FOLDER,		// 1
+	FTP_IMMOB_ROOT_FOLDER,			// 2
+	FTP_IMMOB_VERSION_FOLDER, 		// 3
+	VERSION_FILE_NAME,				// 4
+	IMG1_FILE_NAME,					// 5
+	IMG2_FILE_NAME,					// 6
+	IMG1_CRC_FILE_NAME, 			// 7
+	IMG2_CRC_FILE_NAME, 			// 8
+
+	IMMOB_REGULAR_DATA = 0,
+	IMMOB_READY_FOR_FW_UPDATE,
+	IMMOB_CRC_FILE_RECEIVED,
+	IMMOB_START_BIN_FILE,
+	IMMOB_BIN_FILE_RECEIVING,
+	IMMOB_BIN_FILE_RECEIVED,
+	IMMOB_FW_UPDATE_FAILED,
+
+	CLUSTER = 0,
+	IMMOB,
+}Enum_FTPMsg;
+
+typedef enum
+{
+	VERSION_NOT_CHECKED = 0,
+	SAME_VERSION_FOUND,
+	DIFFERENT_VERSION_FOUND,
+}Enum_FTPVerStatus;
+
+typedef enum
+{
+	NO_FWUPDATE = 0,
+	CHECKSUM_NOT_MATCHING,
+	CHECKSUM_MATCHING,
+	IMMOB_FIRMWARE_UPDATE_OK,
+	IMMOB_FIRMWARE_UPDATE_OK_BUT_BIN_FILE_CLOSING_ERROR,
+	IMMOB_FIRMWARE_UPDATE_OK_BUT_BIN_FILE_DELETE_ERROR,	// 5
+	FOLDER_SETTING_ERROR_AT_FTP,
+	FILE_SEARCH_ERROR_AT_FTP,
+	FILE_DOWNLOAD_ERROR,
+	FILE_ERROR_IN_GSM_MODULE,
+	FILE_IN_GSM_MODULE_IS_OK,		// 10
+	CRC_FILE_NOT_FOUND,
+	CRC_FILE_OPENING_ERROR,
+	CRC_FILE_READING_ERROR,
+	CRC_FILE_READING_OK,
+	CRC_FILE_END_NOT_OK,
+	BIN_FILE_RECEIVED_OK,
+	BIN_FILE_RECEIVED_FAIL,
+	BIN_FILE_READING_ERROR,
+	VALID_IMAGE_NOT_FOUND,
+	DATA_TIME_OUT_ERROR,
+	IMMOB_NOT_READY_FOR_FW,
+}Enum_FWUpdateMsg;
+
+typedef enum
+{
+	FW_UPDATE_NOT_REQD = 0,
+	FW_UPDATE_REQD,
+
+//	CRC_FILE_READING_ERROR = 0,
+//	CRC_FILE_READING_OK,
+
+	FW_UPDATE_STATUS_NOT_CHECKED = 0,
+	FW_UPDATE_STATUS_READY_TO_CHECK,
+	FW_UPDATE_STATUS_CHECKED_TODAY,
+	FW_UPDATE_FOUND,
+
+	VERSION_TYPE_FILE = 0,
+	CRC_TYPE_FILE,
+	BIN_TYPE_FILE,
+
+
+	NO_FW_STATUS = 0,
+	CRC_AND_BIN_FILES_DOWNLOAD_OK,
+	CRC_AND_BIN_FILES_DOWNLOAD_FAIL,
+}Enum_FTPFileMsg;
+
+#pragma pack(push,1)
+typedef struct
+{
+	uint8_t		ucFWCheckedDate;
+	uint8_t		ucFWCheckStatus;
+
+	uint8_t GSMTime;
+	uint8_t GSMDate;
+}TsFTPData;
+#pragma pack(pop)
+
+void vFTP_eInit(void);
+void vFTP_eCheckFTPServerForFWUpdate_Exe(void);
+bool bFTP_eUpdateClusterFirmware_Exe(void);
+bool bFTP_eConnectFTPServer_Exe(void);
+Enum_FWUpdateMsg ucFTP_eUpdateImmobFirmware_Exe(void);
+void vFTP_eFTPClose_Exe(void);
+
+
+#endif
+
+/***** END OF FILE ****/

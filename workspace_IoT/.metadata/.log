@@ -1,0 +1,39 @@
+!SESSION 2025-03-10 11:52:02.005 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_IN
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-10 11:52:31.142
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-10 11:52:31.146
+!MESSAGE Log4j2 initialized with config file C:\BZ\stm32_projects\Standalone_IOT\workspace_IoT\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-10 11:52:37.539
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-03-10 11:54:25.668
+!MESSAGE Indexed 'standalone_IoT-ver_1.0' (40 sources, 144 headers) in 23.7 sec: 16,731 declarations; 101,712 references; 3 unresolved inclusions; 26 syntax errors; 171 unresolved names (0.14%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-03-10 14:03:56.445
+!MESSAGE Indexed 'standalone_IoT-ver_1.0' (40 sources, 144 headers) in 44.9 sec: 16,731 declarations; 101,712 references; 3 unresolved inclusions; 26 syntax errors; 171 unresolved names (0.14%)
+!SESSION 2025-03-10 15:44:10.051 -----------------------------------------------
+eclipse.buildId=Version 1.17.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_IN
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-03-10 15:44:50.785
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-03-10 15:44:50.789
+!MESSAGE Log4j2 initialized with config file C:\BZ\stm32_projects\Standalone_IOT\workspace_IoT\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-03-10 15:45:33.732
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-03-10 15:47:19.245
+!MESSAGE Indexed 'standalone_IoT-ver_1.0' (40 sources, 144 headers) in 23.3 sec: 16,735 declarations; 101,716 references; 3 unresolved inclusions; 26 syntax errors; 171 unresolved names (0.14%)

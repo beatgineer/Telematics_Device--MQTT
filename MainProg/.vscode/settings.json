@@ -1,0 +1,13 @@
+{
+    "C_Cpp.configurationWarnings": "disabled",
+    "files.associations": {
+        "*.c": "c",
+        "comm.h": "c",
+        "stdbool.h": "c",
+        "stdlib.h": "c",
+        "gps.h": "c",
+        "stm32g0xx_it.h": "c",
+        "e2prom_i2c.h": "c",
+        "main.h": "c"
+    }
+}

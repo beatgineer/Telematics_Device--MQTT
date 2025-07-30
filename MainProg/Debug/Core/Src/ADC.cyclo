@@ -1,0 +1,5 @@
+../Core/Src/ADC.c:29:13:MX_ADC1_Init	5
+../Core/Src/ADC.c:99:13:MX_DMA_Init	1
+../Core/Src/ADC.c:111:6:vADC_eInit	1
+../Core/Src/ADC.c:140:6:vBATT_eReadMainBATTVolt_Exe	1
+../Core/Src/ADC.c:155:6:vBATT_eReadIntBATTVolt_Exe	1
