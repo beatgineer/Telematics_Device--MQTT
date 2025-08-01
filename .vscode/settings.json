@@ -2,6 +2,8 @@
     "files.associations": {
         "stdio.h": "c",
         "stm32g0xx_hal.h": "c",
-        "app.h": "c"
+        "app.h": "c",
+        "config_eeprom.h": "c",
+        "e2prom_i2c.h": "c"
     }
 }

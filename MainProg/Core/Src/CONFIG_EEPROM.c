@@ -43,7 +43,7 @@ const TsConfig CONFIG = {
     //	"+919999134462",		// SMS OTA : Master Mobile No.
     "+918373958568", // SMS OTA : Master Mobile No.		// Anil
  
-    "1301",     // IOT SW VERSION - Ready for Release
+    "1303",     // IOT SW VERSION - Ready for Release
     "16052025", // IOT BUILD Date
 };
 #pragma pack(pop)
@@ -63,7 +63,7 @@ const TsEEPROMConfig EEPROMCONFIG = {
     "ecu.revoltmotors.com", // Domain Name
 
     20,   // Tx Rate Ign ON (20 sec)
-    20,  // Tx Rate Ign OFF (10 min)
+    600,  // Tx Rate Ign OFF (10 min)
     3600, // Battery Removed Rate (1 hr)
 
     "0123456789", // CCID

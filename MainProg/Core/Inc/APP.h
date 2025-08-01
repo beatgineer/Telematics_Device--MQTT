@@ -129,21 +129,6 @@ extern "C"
 		bool bVehRunStatus : 1; // 0 - Run, 1 - Stop
 		bool bValChanged : 1;	// 0 - No Value Changed, 1 - Value Changed, Store in EEPROM
 
-		// uint16_t 	uiTxRate;
-		// uint16_t	uiPresentTxRate;
-
-		// uint16_t	uiTimer50mS;
-		// uint8_t		ucTimer200mS;
-		// uint16_t	uiTimer360mS;
-		// uint8_t		ucTimer500mS;
-		// uint8_t		ucTimer900mS;
-		// uint8_t		ucTimer1S;
-		// uint8_t		ucTimer3100mS; //Rev 1.03
-		// uint8_t		ucTimer5S;
-		// uint16_t	uiTimer35S;
-		// uint16_t	uiTimer65S;
-		// uint16_t	uiTimer300S;
-
 		uint16_t uiBATTDataCntr;
 	} TsAPP;
 #pragma pack(pop)

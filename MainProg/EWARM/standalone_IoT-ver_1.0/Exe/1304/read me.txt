@@ -1,0 +1,6 @@
+Version: 1304
+
+Transmission Rates:
+    20,   // Tx Rate Ign ON (20 sec)
+    600,  // Tx Rate Ign OFF (10 min)
+    3600, // Battery Removed Rate (1 hr)

@@ -1,3 +1,20 @@
-To publish message on MQTT : mosquitto_pub -h 13.235.101.231 -t test -m "hello world" -u RovoSync -P Yt7rt4hgTVhfY
+/======================================PUBLISH Payload=================================================================/
 
-To receive message on MQTT :mosquitto_sub -h 13.235.101.231 -t rev25 -u RovoSync -P Yt7rt4hgTVhfY
+To publish message on MQTT : 
+			    mosquitto_pub -h 13.235.101.231 -t test -m "hello world" -u RovoSync -P Yt7rt4hgTVhfY
+
+
+To receive message on MQTT :
+			    mosquitto_sub -h 13.235.101.231 -t rev25 -u RovoSync -P Yt7rt4hgTVhfY
+
+
+
+/==================================START STOP Vehicle=====================================================================/
+
+To START vehicle : 
+		  mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m '{"cmd":"start"}' -u RovoSync -P Yt7rt4hgTVhfY
+
+To STOP vehicle : 
+		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m '{"cmd":"stop"}' -u RovoSync -P Yt7rt4hgTVhfY
+
+

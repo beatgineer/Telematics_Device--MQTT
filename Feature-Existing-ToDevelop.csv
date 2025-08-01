@@ -1,0 +1,15 @@
+"Telematics Device
+Existing vs New 
+features status",,,,
+,,,,
+Sr No.,Feature,Existing,New,Implementing Status
+1,TCP Protocol,??,?,DONE
+2,MQTT Protocol,?,??,DONE
+3,Bootloader with FOTA,??,??,DONE
+4,SMS Immobilization using CAN,??,?,DONE
+5,MQTT Immobilization using CAN,?,??,Pending
+6,Bluetooth,??,??,Pending
+7,Local storage and replay of data if MQTT connection is lost/unstable.,?,??,Pending
+8,Smart Riding Recommendations using APIs,?,??,Pending
+9,V2X communication ,?,??,Pending
+10,freeRTOS,?,??,Pending

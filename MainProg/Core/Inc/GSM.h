@@ -294,11 +294,11 @@ typedef enum
 	ATRESPONSE_CONNECT, // 35
 	GPSATRESPONSE_QGNSSC,
 	GPSATRESPONSE_QGPSLOC, // 37
-	ATRESPONSE_QMTOPEN,	   
-	ATRESPONSE_QMTCONN,	   
-	ATRESPONSE_QMTPUB,	   //40
-	ATRESPONSE_QMTDISC,	   
-	ATRESPONSE_QMTCLOSE,   // 42
+	ATRESPONSE_QMTOPEN,
+	ATRESPONSE_QMTCONN,
+	ATRESPONSE_QMTPUB, // 40
+	ATRESPONSE_QMTDISC,
+	ATRESPONSE_QMTCLOSE, // 42
 } Enum_GSM_ATResponse;
 
 //----------------------------------------------------------------
@@ -321,7 +321,9 @@ typedef union
 		bool bAPNStatus : 1;		   // 0 - Not Set, 1 - APN Set
 		bool bRTCStatus : 1;		   // 0 - Not Valid, 1 - Valid
 
-		bool bMQTTConnected; // 0 - Not Connected, 1 - Connected
+		bool bMQTTConnected : 1; // 0 - Not Connected, 1 - Connected
+
+		bool bMQTTVehicleCmd : 1; // 0 - STOP, 1 - START
 
 		bool bPwrDownStatus : 1; // 0 - GSM Active, 1 - Power Down,
 		bool bFWSMSPending : 1;	 // 0 - No, 1 - Pending
@@ -329,6 +331,11 @@ typedef union
 	};
 	uint8_t ucData[3];
 } TsGSMStatus;
+typedef enum
+{
+	MQTTCOMMAND_SETVEHICLESTOP, // 0
+	MQTTCOMMAND_SETVEHICLERUN, // 1
+} MQTTCommand;
 
 #pragma pack(push, 1)
 typedef struct
@@ -401,8 +408,11 @@ uint8_t ucGSM_eReadSMS_Exe(uint8_t ucSMSIndex);
 bool bGSM_eDeleteSMS_Exe(uint8_t ucSMSIndex);
 bool bGSM_eSendSMS_Exe(char *cReceiverMobile, char *cMessage);
 bool bMQTT_CheckAndConnect_Exe(void);
-bool bMQTT_PublishData_Exe(void);
+bool bMQTT_PublishPayload_Exe(void);
+bool bMQTT_PublishVehicleState_Exe(void);
 bool bMQTT_SendPublishCmd_Exe(const char *topic, const char *payload);
+bool bMQTT_SubscribeTopic_Exe(const char *topic);
+void vGSM_ParseMQTTMessage(const char *mqttLine);
 void vMQTT_Disconnect_Exe(void);
 void vGSM_SendString(const char *str);
 void vGSM_SendByte(uint8_t byte);

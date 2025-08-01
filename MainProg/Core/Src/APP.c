@@ -206,7 +206,7 @@ int main(void)
 			TIMERData.uiTimer360mS = 0;
 			vODO_eCalculateTripAndOdo_Exe(CANData.ucSpeedInkmph);
 			vAPP_iReadIgnStatus_Exe();
-                        vBATT_eDetectBatteryPresence();
+			vBATT_eDetectBatteryPresence();
 		}
 		else
 		{
@@ -236,6 +236,7 @@ int main(void)
 		{
 			TIMERData.ul65SecCntr = 0;
 			// vGEN_eMakeGSMPowerDownIfBattNotPresent_Exe();
+			bMQTT_PublishVehicleState_Exe();
 			vAPP_iVehicleRunStatusAction_Exe();
 			vAPP_iReadOTACmdFrmSMS_Exe();
 		}
@@ -250,7 +251,7 @@ int main(void)
 		{
 			TIMERData.ul300SecCntr = 0;
 			vFTP_eCheckFTPServerForFWUpdate_Exe();
-			HAL_UART_Transmit(&huart1, (uint8_t *)"OTA not done\n", 13, 500);
+//			HAL_UART_Transmit(&huart1, (uint8_t *)"OTA not done\n", 13, 500);
 		}
 
 		if (TIMERData.uiLEDCntr > 200)
@@ -513,7 +514,7 @@ bool SendDataOverMQTT_Exe(void)
 		bStatus = bMQTT_CheckAndConnect_Exe(); // Check broker connection
 		if (bStatus == TRUE)
 		{
-			bStatus = bMQTT_PublishData_Exe(); // Publish live data
+			bStatus = bMQTT_PublishPayload_Exe(); // Publish live data
 		}
 
 		ucTry++;

@@ -14,6 +14,8 @@
 #include "COMM.H"
 #include "OTA.H"
 #include "UTL.H"
+#include "CONFIG_EEPROM.h"
+#include "E2PROM_I2C.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -26,6 +28,7 @@
 
 TsGSMData GSMData;
 TsGSMStatus GSMStatus;
+extern TsAPP APPStatus;
 extern const TsEEPROMConfig EEPROMCONFIG;
 extern TsAPP_eTimer TIMERData;
 extern TsGPSData GPSData;
@@ -457,7 +460,6 @@ uint8_t ucGSM_eProcessATCmd_Exe(char *cATCmd, uint8_t ucRespNum, uint32_t ulTime
     return ucTemp;
 }
 
-
 // ============================================================================
 // Name		: vGSM_eWait4RespOrTimeOut_Exe
 // Objective	:1. Wait for Response from GSM Module
@@ -638,11 +640,12 @@ void vGSM_eStartGSM_Exe(void)
 
     vGSM_eDisableGPRS_Exe(PDP_CONTEXT_ID);
 
-    if(GSMStatus.bMQTTConnected)
+    if (GSMStatus.bMQTTConnected)
     {
         vMQTT_Disconnect_Exe();
     }
-    else{
+    else
+    {
         GSMStatus.bMQTTConnected = false;
     }
 }
@@ -1803,7 +1806,7 @@ bool bMQTT_CheckAndConnect_Exe(void)
         return false;
 
     // Step 3: Send CONNECT packet (Client ID, Username, Password)
-    snprintf(atCmd, sizeof(atCmd), "AT+QMTCONN=0,\"%s\",\"%s\",\"%s\"\r\n",APPCONFIG.cIMEI,EEPROMCONFIG.cMQTT_Username, EEPROMCONFIG.cMQTT_Password);
+    snprintf(atCmd, sizeof(atCmd), "AT+QMTCONN=0,\"%s\",\"%s\",\"%s\"\r\n", APPCONFIG.cIMEI, EEPROMCONFIG.cMQTT_Username, EEPROMCONFIG.cMQTT_Password);
 
     resp = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_OK, 7000, 3000);
     if (resp != RESPONSE_MATCHING)
@@ -1815,6 +1818,8 @@ bool bMQTT_CheckAndConnect_Exe(void)
         return false;
 
     vAPP_eFeedTheWDT_Exe();
+
+    bMQTT_SubscribeTopic_Exe(APPCONFIG.cIMEI);
 
     // Update connection status and return
     GSMStatus.bMQTTConnected = bStatus;
@@ -1836,7 +1841,7 @@ bool bMQTT_SendPublishCmd_Exe(const char *topic, const char *payload)
 
     bStatus = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_SEND, 200, 3000); // Wait for '>' prompt
     if (bStatus != RESPONSE_MATCHING)
-       return false;
+        return false;
 
     // Step 2: Send payload
     vGSM_SendString(payload);
@@ -1847,12 +1852,100 @@ bool bMQTT_SendPublishCmd_Exe(const char *topic, const char *payload)
     return bStatus;
 }
 
+void vGSM_ParseMQTTMessage(const char *mqttLine)
+{
+    const char *payloadStart = strchr(mqttLine, ',');
+    if (payloadStart == NULL)
+        return;
+
+    // Move to second comma
+    payloadStart = strchr(payloadStart + 1, ',');
+    if (payloadStart == NULL)
+        return;
+
+    payloadStart += 2; // Skip comma and first quote
+
+    char payload[128] = {0};
+    const char *payloadEnd = strrchr(payloadStart, '"');
+    if (payloadEnd == NULL)
+        return;
+
+    size_t len = payloadEnd - payloadStart;
+    if (len >= sizeof(payload))
+        len = sizeof(payload) - 1;
+
+    strncpy(payload, payloadStart, len);
+    payload[len] = '\0';
+
+    // Example: payload = {"cmd":"immobilise"}
+    if (strstr(payload, "start"))
+    {
+        APPStatus.bVehRunStatus = VEHICLE_RUN;
+        GSMStatus.bMQTTVehicleCmd = 1;
+        // HAL_UART_Transmit(&huart1, (uint8_t *)"VEHICLE START\n", 13, 500);
+    }
+    else if (strstr(payload, "stop"))
+    {
+        APPStatus.bVehRunStatus = VEHICLE_STOP;
+        GSMStatus.bMQTTVehicleCmd = 1;
+        // HAL_UART_Transmit(&huart1, (uint8_t *)"VEHICLE STOP\n", 13, 500);
+    }
+
+#ifdef DEBUG
+    printf("MQTT Payload: %s\n", payload);
+#endif
+}
+
 //---------------------------------------------
-// Main MQTT Data Publisher
+// Main MQTT Payload Publisher
 //---------------------------------------------
-bool bMQTT_PublishData_Exe(void)
+bool bMQTT_PublishPayload_Exe(void)
 {
     return bMQTT_SendPublishCmd_Exe(EEPROMCONFIG.cTopic, cAPP_eGlobalBuffer);
+}
+
+//---------------------------------------------
+// Main MQTT Vehicle Status Publisher
+//---------------------------------------------
+bool bMQTT_PublishVehicleState_Exe(void)
+{
+    bool status = true;
+
+    if (GSMStatus.bMQTTVehicleCmd == 1 && APPStatus.bVehRunStatus == VEHICLE_RUN)
+    {
+        GSMStatus.bMQTTVehicleCmd = 0;
+        status = bMQTT_SendPublishCmd_Exe(APPCONFIG.cIMEI, "VEHICLE STARTED");
+        vEEPROM_eWriteByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS, VEHICLE_RUN);
+    }
+    else if (GSMStatus.bMQTTVehicleCmd == 1 && APPStatus.bVehRunStatus == VEHICLE_STOP)
+    {
+        GSMStatus.bMQTTVehicleCmd = 0;
+        status = bMQTT_SendPublishCmd_Exe(APPCONFIG.cIMEI, "VEHICLE STOPPED");
+        vEEPROM_eWriteByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS, VEHICLE_STOP);
+    }
+
+    return status;
+}
+
+//---------------------------------------------
+// MQTT Subscribe Wrapper
+//---------------------------------------------
+bool bMQTT_SubscribeTopic_Exe(const char *topic)
+{
+    char atCmd[128];
+    bool bStatus;
+
+    sprintf(atCmd, "AT+QMTSUB=0,1,\"%s\",0\r", topic);
+
+    bStatus = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_OK, 500, 3000); // Wait for '>' prompt
+    if (bStatus != RESPONSE_MATCHING)
+        return false;
+
+    else
+    {
+        return true;
+    }
+    return bStatus;
 }
 
 //---------------------------------------------

@@ -41,8 +41,8 @@
         <ShowArgs>0</ShowArgs>
     </CallStack>
     <ArmDriver>
-        <EnableCache>0</EnableCache>
         <EnforceMemoryConfiguration>1</EnforceMemoryConfiguration>
+        <EnableCache>0</EnableCache>
     </ArmDriver>
     <watch_formats>
         <Fmt0>{W}42:ulFlashDestination	4	0</Fmt0>

@@ -11,8 +11,8 @@
 #include "stm32g0xx.h"
 #include <stdbool.h>
 
-#define FW_UPDATE_HRS_MIN		0x12U
-#define FW_UPDATE_HRS_MAX		0x13U
+#define FW_UPDATE_HRS_MIN		0x02U
+#define FW_UPDATE_HRS_MAX		0x03U
 
 #define CANID_IMMOM_FW_UPDATE	0x300
 

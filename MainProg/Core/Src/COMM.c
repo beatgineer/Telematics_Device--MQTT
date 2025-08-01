@@ -142,6 +142,25 @@ void vCOMM_eTxString_Exe(UART_HandleTypeDef *USARTx, char *pcMessage, uint16_t u
 // Return	: none
 // Version	: -
 // ----------------------------------------------------------------------------
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+// {
+//   if (huart->Instance == USART3)
+//   {
+//     if (GSM_RxCntr < GSM_BuffSize - 1)
+//     {
+//       GSM_DataBuffer[GSM_RxCntr++] = GSM_RxOneByte[0];
+//       GSM_DataBuffer[GSM_RxCntr] = 0;
+//     }
+//     else
+//     {
+//       GSM_RxCntr = GSM_BuffSize - 1;
+//     }
+
+//     GSM_TimeOut = 0;
+//     HAL_UART_Receive_IT(GSMComPortHandle, (uint8_t *)GSM_RxOneByte, 1);
+//   }
+// }
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == USART3)
@@ -150,6 +169,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
       GSM_DataBuffer[GSM_RxCntr++] = GSM_RxOneByte[0];
       GSM_DataBuffer[GSM_RxCntr] = 0;
+
+        // Check if buffer has the +QMTRECV string
+        if (strstr((char *)GSM_DataBuffer, "+QMTRECV:") != NULL)
+        {
+          vGSM_ParseMQTTMessage((char *)GSM_DataBuffer); // <- Call your parser
+        }
+
+        // // Reset buffer for next line
+        // GSM_RxCntr = 0;
+        // memset(GSM_DataBuffer, 0, GSM_BuffSize);
     }
     else
     {
