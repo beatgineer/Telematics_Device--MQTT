@@ -18,8 +18,8 @@ extern uint8_t ucBATTFlag;
 #define ADC_CFAC_INTBATTVOL (float)1.129	// Date:10-07-2025
 #define ADC_CFAC_INTBATTCHGSTATUS (float)1.129	// Date:10-07-2025
 
-#define INT_BATT_PRESENT_THRESHOLD_MV 1100 // Safe threshold ~1.0V
-#define MAIN_BATT_PRESENT_THRESHOLD_MV 1100 // Safe threshold ~1.0V
+#define INT_BATT_PRESENT_THRESHOLD_MV 1500 // Safe threshold ~1.0V
+#define MAIN_BATT_PRESENT_THRESHOLD_MV 1500 // Safe threshold ~1.0V
 
 #define MAINBATT_ADCIN6_Pin 			GPIO_PIN_6
 #define MAINBATT_ADCIN6_GPIO_Port 		GPIOA

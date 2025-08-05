@@ -75,9 +75,9 @@ typedef enum
 extern const char *cOTA_eOTACommandTbl[];
 
 void vOTA_eInit(void);
-void vOTA_eExecuteOTACmd_Exe(uint8_t ucOTACmdIndex);
-void vOTA_eReadSMSOTACmdFromSIM_Exe(void);
-void vOTA_eReadSMSOTACmdFromME_Exe(void);
+// void vOTA_eExecuteOTACmd_Exe(uint8_t ucOTACmdIndex);
+// void vOTA_eReadSMSOTACmdFromSIM_Exe(void);
+// void vOTA_eReadSMSOTACmdFromME_Exe(void);
 
 #endif
 

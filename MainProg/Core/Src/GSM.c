@@ -16,7 +16,8 @@
 #include "UTL.H"
 #include "CONFIG_EEPROM.h"
 #include "E2PROM_I2C.h"
-
+#include "CAN.h"
+#include "FTP.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -25,9 +26,12 @@
 //*****************************************************************************
 // EXTERNAL VARIABLES
 //*****************************************************************************
+extern uint8_t ucCAN_eRxData[8];
 
 TsGSMData GSMData;
 TsGSMStatus GSMStatus;
+extern TsFTPData FTPData;
+extern TsCAN CANData;
 extern TsAPP APPStatus;
 extern const TsEEPROMConfig EEPROMCONFIG;
 extern TsAPP_eTimer TIMERData;
@@ -208,14 +212,6 @@ void vGSM_eInit(void)
     GSMData.ucTotalSMSMS = 0;
 
     GSMStatus.bFWSMSPending = FALSE;
-
-    // if (APPData.ucHWVer == 'D')
-    // {
-    // 	vGSM_eTurnONGSM_Exe();
-    // }
-    // else
-    // {
-    // }
 
     vCOMM_eUSART3Init();
     HAL_UART_Receive_IT(GSMComPortHandle, (uint8_t *)GSM_RxOneByte, 1);
@@ -1776,188 +1772,9 @@ bool ucGSM_eWaitForATResponse(const char *expected, uint32_t pollDelay, uint32_t
     return false;
 }
 
-//---------------------------------------------
-// MQTT Authentication and Connection Setup
-//---------------------------------------------
-bool bMQTT_CheckAndConnect_Exe(void)
-{
-    bool bStatus = false;
-    uint8_t resp;
-    char atCmd[150];
 
-    if (GSMStatus.bMQTTConnected)
-        return true;
 
-    // Step 1: Configure authentication (client ID, username, password)
-    sprintf(atCmd, "AT+QMTCFG=\"SSL\",0,0\r\n"); // Disable SSL for MQTT connection
-    resp = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_OK, 500, 3000);
-    if (resp != RESPONSE_MATCHING)
-        return false;
-
-    // Step 2: Open TCP connection to broker
-    sprintf(atCmd, "AT+QMTOPEN=0,\"%s\",%s\r", EEPROMCONFIG.cLocationIPAdd, EEPROMCONFIG.cLocationPortNum);
-    resp = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_OK, 500, 3000);
-    if (resp != RESPONSE_MATCHING)
-        return false;
-
-    // Step 2.1: Wait for unsolicited +QMTOPEN: 0,0
-    bStatus = ucGSM_eWaitForATResponse("+QMTOPEN: 0,0", 500, 5000);
-    if (!bStatus)
-        return false;
-
-    // Step 3: Send CONNECT packet (Client ID, Username, Password)
-    snprintf(atCmd, sizeof(atCmd), "AT+QMTCONN=0,\"%s\",\"%s\",\"%s\"\r\n", APPCONFIG.cIMEI, EEPROMCONFIG.cMQTT_Username, EEPROMCONFIG.cMQTT_Password);
-
-    resp = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_OK, 7000, 3000);
-    if (resp != RESPONSE_MATCHING)
-        return false;
-
-    // Step 3.1: Wait for unsolicited +QMTCONN: 0,0,0 (success)
-    bStatus = ucGSM_eWaitForATResponse("+QMTCONN: 0,0,0", 500, 3000);
-    if (resp != RESPONSE_MATCHING)
-        return false;
-
-    vAPP_eFeedTheWDT_Exe();
-
-    bMQTT_SubscribeTopic_Exe(APPCONFIG.cIMEI);
-
-    // Update connection status and return
-    GSMStatus.bMQTTConnected = bStatus;
-    return bStatus;
-}
-
-//---------------------------------------------
-// MQTT Publish Wrapper
-//---------------------------------------------
-bool bMQTT_SendPublishCmd_Exe(const char *topic, const char *payload)
-{
-    char atCmd[128];
-    bool bStatus;
-
-    int len = strlen(payload);
-
-    // Step 1: Send the AT command to initiate publish
-    sprintf(atCmd, "AT+QMTPUB=0,0,0,1,\"%s\"\r\n", topic); // QOS=0, Retain=0
-
-    bStatus = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_SEND, 200, 3000); // Wait for '>' prompt
-    if (bStatus != RESPONSE_MATCHING)
-        return false;
-
-    // Step 2: Send payload
-    vGSM_SendString(payload);
-    vGSM_SendByte(0x1A); // End of message (CTRL+Z)
-
-    // Step 3: Wait for publish confirmation
-    bStatus = ucGSM_eWaitForATResponse("+QMTPUB: 0,0,0", 200, 5000);
-    return bStatus;
-}
-
-void vGSM_ParseMQTTMessage(const char *mqttLine)
-{
-    const char *payloadStart = strchr(mqttLine, ',');
-    if (payloadStart == NULL)
-        return;
-
-    // Move to second comma
-    payloadStart = strchr(payloadStart + 1, ',');
-    if (payloadStart == NULL)
-        return;
-
-    payloadStart += 2; // Skip comma and first quote
-
-    char payload[128] = {0};
-    const char *payloadEnd = strrchr(payloadStart, '"');
-    if (payloadEnd == NULL)
-        return;
-
-    size_t len = payloadEnd - payloadStart;
-    if (len >= sizeof(payload))
-        len = sizeof(payload) - 1;
-
-    strncpy(payload, payloadStart, len);
-    payload[len] = '\0';
-
-    // Example: payload = {"cmd":"immobilise"}
-    if (strstr(payload, "start"))
-    {
-        APPStatus.bVehRunStatus = VEHICLE_RUN;
-        GSMStatus.bMQTTVehicleCmd = 1;
-        // HAL_UART_Transmit(&huart1, (uint8_t *)"VEHICLE START\n", 13, 500);
-    }
-    else if (strstr(payload, "stop"))
-    {
-        APPStatus.bVehRunStatus = VEHICLE_STOP;
-        GSMStatus.bMQTTVehicleCmd = 1;
-        // HAL_UART_Transmit(&huart1, (uint8_t *)"VEHICLE STOP\n", 13, 500);
-    }
-
-#ifdef DEBUG
-    printf("MQTT Payload: %s\n", payload);
-#endif
-}
-
-//---------------------------------------------
-// Main MQTT Payload Publisher
-//---------------------------------------------
-bool bMQTT_PublishPayload_Exe(void)
-{
-    return bMQTT_SendPublishCmd_Exe(EEPROMCONFIG.cTopic, cAPP_eGlobalBuffer);
-}
-
-//---------------------------------------------
-// Main MQTT Vehicle Status Publisher
-//---------------------------------------------
-bool bMQTT_PublishVehicleState_Exe(void)
-{
-    bool status = true;
-
-    if (GSMStatus.bMQTTVehicleCmd == 1 && APPStatus.bVehRunStatus == VEHICLE_RUN)
-    {
-        GSMStatus.bMQTTVehicleCmd = 0;
-        status = bMQTT_SendPublishCmd_Exe(APPCONFIG.cIMEI, "VEHICLE STARTED");
-        vEEPROM_eWriteByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS, VEHICLE_RUN);
-    }
-    else if (GSMStatus.bMQTTVehicleCmd == 1 && APPStatus.bVehRunStatus == VEHICLE_STOP)
-    {
-        GSMStatus.bMQTTVehicleCmd = 0;
-        status = bMQTT_SendPublishCmd_Exe(APPCONFIG.cIMEI, "VEHICLE STOPPED");
-        vEEPROM_eWriteByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS, VEHICLE_STOP);
-    }
-
-    return status;
-}
-
-//---------------------------------------------
-// MQTT Subscribe Wrapper
-//---------------------------------------------
-bool bMQTT_SubscribeTopic_Exe(const char *topic)
-{
-    char atCmd[128];
-    bool bStatus;
-
-    sprintf(atCmd, "AT+QMTSUB=0,1,\"%s\",0\r", topic);
-
-    bStatus = ucGSM_eProcessATCmd_Exe(atCmd, ATRESPONSE_OK, 500, 3000); // Wait for '>' prompt
-    if (bStatus != RESPONSE_MATCHING)
-        return false;
-
-    else
-    {
-        return true;
-    }
-    return bStatus;
-}
-
-//---------------------------------------------
-// Disconnect MQTT
-//---------------------------------------------
-void vMQTT_Disconnect_Exe(void)
-{
-    ucGSM_eProcessATCmdWithCmdNum_Exe(ATCOMMAND_QMTDISC, ATRESPONSE_QMTDISC, 1000, 2000);
-    ucGSM_eProcessATCmdWithCmdNum_Exe(ATCOMMAND_QMTCLOSE, ATRESPONSE_QMTCLOSE, 1000, 2000);
-    GSMStatus.bMQTTConnected = false;
-}
-
+#if 0
 // ============================================================================
 // Name		: bGSM_eCheckPendingSMS_Exe
 // Objective	: Read if any Pending SMS is present. Also SIM set as storage for SMS.
@@ -2284,3 +2101,4 @@ bool bGSM_eSendSMS_Exe(char *cReceiverMobile, char *cMessage)
     }
     return bStatus;
 }
+#endif

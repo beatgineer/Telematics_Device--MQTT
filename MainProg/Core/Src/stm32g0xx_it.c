@@ -155,7 +155,7 @@ void SysTick_Handler(void)
   TIMERData.uiLEDCntr++;
   TIMERData.ul30SecCntr++;
   TIMERData.ul18SecCntr++;
-  TIMERData.ul65SecCntr++;
+  TIMERData.ul15SecCntr++;
   TIMERData.uiTimer360mS++;
   TIMERData.ul300SecCntr++;
 

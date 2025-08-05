@@ -42,8 +42,9 @@ const TsConfig CONFIG = {
     // "+919811451380",		// SMS OTA : Master Mobile No.		// AK
     //	"+919999134462",		// SMS OTA : Master Mobile No.
     "+918373958568", // SMS OTA : Master Mobile No.		// Anil
- 
-    "1303",     // IOT SW VERSION - Ready for Release
+
+    // "1301", // IOT SW VERSION - Ready for Release
+    "0002", // IOT SW VERSION - Test Version
     "16052025", // IOT BUILD Date
 };
 #pragma pack(pop)
@@ -51,19 +52,19 @@ const TsConfig CONFIG = {
 #pragma pack(push, 1)
 const TsEEPROMConfig EEPROMCONFIG = {
     0x11, 0x22, 0x33, 0x44, 0x55, // Signature
- 
+
     "m2m.myrevolt.com", // APN
 
     0,                      // Status
     "13.235.101.231",       // IP address
     "1883",                 // Port number
     "RovoSync",             // Username
-    "Yt7rt4hgTVhfY",         // Password
-    "rev25",                 // MQTT Topic
+    "Yt7rt4hgTVhfY",        // Password
+    "rev25",                // MQTT Topic
     "ecu.revoltmotors.com", // Domain Name
 
-    20,   // Tx Rate Ign ON (20 sec)
-    600,  // Tx Rate Ign OFF (10 min)
+    10,   // Tx Rate Ign ON (20 sec)
+    600,   // Tx Rate Ign OFF (10 min)
     3600, // Battery Removed Rate (1 hr)
 
     "0123456789", // CCID
@@ -75,51 +76,51 @@ void vCONFIGEEPROM_eReadConfigData_Exe(void)
 {
     uint8_t ucSigBuffer[20];
     uint8_t ucTempBuffer[2];
-    
-    	char cBuff[20];
-	int16_t iVal;
+
+    char cBuff[20];
+    int16_t iVal;
 
     // Read the signature from EEPROM
     vEEPROM_eReadBytes_Exe(EEPROM_ADDR_SIG, ucSigBuffer, 5);
 
     // Compare EEPROM signature with default
-   if (!((ucSigBuffer[0] == EEPROMCONFIG.ucSig1) && \
-         (ucSigBuffer[1] == EEPROMCONFIG.ucSig2) && \
-         (ucSigBuffer[2] == EEPROMCONFIG.ucSig3) && \
-         (ucSigBuffer[3] == EEPROMCONFIG.ucSig4) && \
-         (ucSigBuffer[4] == EEPROMCONFIG.ucSig5)))
-   {
+    if (!((ucSigBuffer[0] == EEPROMCONFIG.ucSig1) &&
+          (ucSigBuffer[1] == EEPROMCONFIG.ucSig2) &&
+          (ucSigBuffer[2] == EEPROMCONFIG.ucSig3) &&
+          (ucSigBuffer[3] == EEPROMCONFIG.ucSig4) &&
+          (ucSigBuffer[4] == EEPROMCONFIG.ucSig5)))
+    {
         vCONFIGEEPROM_eLoadDefaultPar_Exe();
         APPStatus.uiMsgCntr = 0;
         vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_MSGCOUNTER, (uint8_t *)&APPStatus.uiMsgCntr, sizeof(APPStatus.uiMsgCntr));
-   }
+    }
 
     // Compare EEPROM signature with default
-//    if (memcmp(ucSigBuffer, (uint8_t *)&EEPROMCONFIG.ucSig1, 5) != 0)
-//    {
-//         vCONFIGEEPROM_eLoadDefaultPar_Exe();
-//         APPStatus.uiMsgCntr = 0;
-//         vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_MSGCOUNTER, (uint8_t *)&APPStatus.uiMsgCntr, sizeof(APPStatus.uiMsgCntr));
-//    }
+    //    if (memcmp(ucSigBuffer, (uint8_t *)&EEPROMCONFIG.ucSig1, 5) != 0)
+    //    {
+    //         vCONFIGEEPROM_eLoadDefaultPar_Exe();
+    //         APPStatus.uiMsgCntr = 0;
+    //         vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_MSGCOUNTER, (uint8_t *)&APPStatus.uiMsgCntr, sizeof(APPStatus.uiMsgCntr));
+    //    }
 
     // Read stored values from EEPROM
 
-    //IMEI
+    // IMEI
     vEEPROM_eReadBytes_Exe(EEPROM_ADDR_IMEI, (uint8_t *)APPCONFIG.cIMEI, LEN_IMEINUM);
 
-    //IP Address
+    // IP Address
     vEEPROM_eReadBytes_Exe(EEPROM_ADDR_DATA_SERVER_IPADDR, (uint8_t *)APPCONFIG.cDataServerIP, LEN_SERVERIP);
 
-    //Port Number
+    // Port Number
     vEEPROM_eReadBytes_Exe(EEPROM_ADDR_DATA_SERVER_PORTNUM, (uint8_t *)APPCONFIG.cDataServerPort, LEN_PORTNUM);
 
-    //Domain Name
+    // Domain Name
     APPCONFIG.ucProtocol = ucEEPROM_eReadByte_Exe(EEPROM_ADDR_PROTOCOL);
 
-    //APN
+    // APN
     vEEPROM_eReadBytes_Exe(EEPROM_ADDR_APN, (uint8_t *)APPCONFIG.cAPN, LEN_APN);
 
-    //CCID
+    // CCID
     vEEPROM_eReadBytes_Exe(EEPROM_ADDR_GSM_CCID, (uint8_t *)APPCONFIG.cCCID, LEN_CCID);
 
     APPStatus.bVehRunStatus = ucEEPROM_eReadByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS);
@@ -140,8 +141,8 @@ void vCONFIGEEPROM_eReadConfigData_Exe(void)
     // VEHICLE RUN STATUS
     APPStatus.bVehRunStatus = ucEEPROM_eReadByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS);
 
-//    uint8_t ucFWCheckedDate = 0;
-//    vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_FW_CHECKED_DATE, &ucFWCheckedDate, 1);
+    //    uint8_t ucFWCheckedDate = 0;
+    //    vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_FW_CHECKED_DATE, &ucFWCheckedDate, 1);
     // FW Checked Date
     FTPData.ucFWCheckedDate = ucEEPROM_eReadByte_Exe(EEPROM_ADDR_FW_CHECKED_DATE);
 
@@ -182,10 +183,10 @@ void vCONFIGEEPROM_eLoadDefaultPar_Exe(void)
         // vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_IMEI, ucIMEIBuffer, LEN_IMEINUM);
         vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_IMEI, APPCONFIG.cIMEI, LEN_IMEINUM);
     }
-    
+
     // if (bGSM_eGetIMEINum_Exe((char *)ucIMEIBuffer))
     // {
-    //     vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_IMEI, ucIMEIBuffer, LEN_IMEINUM);  
+    //     vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_IMEI, ucIMEIBuffer, LEN_IMEINUM);
     // }
     // else
     // {
@@ -226,13 +227,13 @@ void vCONFIGEEPROM_eLoadDefaultPar_Exe(void)
     vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_TXRATE_IGNOFF, ucTempBuffer, 2);
 
     // BATT ID
-   /* ucTempBuffer[0] = 0;
-    ucTempBuffer[1] = 0;
-    vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_BATTID, (char *)ucTempBuffer, LEN_BATTID);*/
+    /* ucTempBuffer[0] = 0;
+     ucTempBuffer[1] = 0;
+     vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_BATTID, (char *)ucTempBuffer, LEN_BATTID);*/
     vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_BATTID, CANData.cVehBattID, LEN_BATTID);
 
     // CANData.cVehBattID
-        CANData.cVehBattID[0] = 0;
+    CANData.cVehBattID[0] = 0;
     //	CANStatus.bBATTIDReadStatus = false;	// Rev 1.01 28-08-2024
     CANStatus.bBattCANStatus7 = false;
     CANStatus.bBattCANStatus8 = false;

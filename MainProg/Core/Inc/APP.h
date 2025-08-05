@@ -100,7 +100,7 @@ extern "C"
 
 		uint32_t ul30SecCntr;
 		uint32_t ul18SecCntr;
-		uint32_t ul65SecCntr;
+		uint32_t ul15SecCntr;
 		uint32_t uiTimer360mS;
 		uint32_t ul300SecCntr;
 

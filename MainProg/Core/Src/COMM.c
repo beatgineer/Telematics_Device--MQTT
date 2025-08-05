@@ -24,6 +24,7 @@ TIM_HandleTypeDef htim16;
 
 TsUARTData UARTData;
 extern TsGSMData GSMData;
+extern TsGSMStatus GSMStatus;
 
 //*****************************************************************************
 
@@ -126,8 +127,15 @@ void vCOMM_eTxString_Exe(UART_HandleTypeDef *USARTx, char *pcMessage, uint16_t u
   {
     Error_Handler();
   }
-
   UARTData.uiUARTTxCntr = uiLen;
+}
+
+void print(char *pcMessage)
+{
+  // HAL_UART_Transmit(&huart1, (uint8_t *)pcMessage, uiLen, uiTimeOut) != HAL_OK)
+  uint16_t uiLen;
+  uiLen = strlen(pcMessage);
+  HAL_UART_Transmit(&huart1, (uint8_t *)pcMessage, uiLen, 500);
 }
 
 // ----------------------------------------------------------------------------
@@ -170,19 +178,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       GSM_DataBuffer[GSM_RxCntr++] = GSM_RxOneByte[0];
       GSM_DataBuffer[GSM_RxCntr] = 0;
 
-        // Check if buffer has the +QMTRECV string
-        if (strstr((char *)GSM_DataBuffer, "+QMTRECV:") != NULL)
-        {
-          vGSM_ParseMQTTMessage((char *)GSM_DataBuffer); // <- Call your parser
-        }
-
-        // // Reset buffer for next line
-        // GSM_RxCntr = 0;
-        // memset(GSM_DataBuffer, 0, GSM_BuffSize);
+      // Don't parse anything here — just store the byte
+      // Optional: check for newline in a very fast way
+      if (strstr((char *)GSM_DataBuffer, "+QMTRECV:") != NULL)
+      {
+        GSMStatus.GSM_MessageReady = 1;
+      }
     }
     else
     {
-      GSM_RxCntr = GSM_BuffSize - 1;
+      GSM_RxCntr = 0; // prevent overflow
     }
 
     GSM_TimeOut = 0;

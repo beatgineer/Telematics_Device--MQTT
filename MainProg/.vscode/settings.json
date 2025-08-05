@@ -8,6 +8,7 @@
         "gps.h": "c",
         "stm32g0xx_it.h": "c",
         "e2prom_i2c.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "stm32g0b1xx.h": "c"
     }
 }

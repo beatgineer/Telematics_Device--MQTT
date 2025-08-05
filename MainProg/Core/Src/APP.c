@@ -59,6 +59,7 @@
 #include "OTA.h"
 #include "ODO.h"
 #include "FTP.h"
+#include "MQTT.h"
 
 // ============================================================================
 // FUNCTION PROTOTYPE
@@ -185,13 +186,14 @@ int main(void)
 
 	TIMERData.ul18SecCntr = 0;
 	TIMERData.ul30SecCntr = 0;
-	TIMERData.ul65SecCntr = 0;
+	TIMERData.ul15SecCntr = 0;
 
 	// =============================================================================
 
 	while (1)
 	{
 		vAPP_eFeedTheWDT_Exe();
+		vMQTT_Incoming_Msg();
 		vCAN_eReadCANData_Exe();
 		vCAN_eGetBattID_Exe();
 		vAPP_iReadIgnStatus_Exe();
@@ -232,13 +234,13 @@ int main(void)
 			}
 		}
 
-		if (TIMERData.ul65SecCntr >= 15000) // replaced 65sec to 15sec for testing purpose
+		if (TIMERData.ul15SecCntr >= 15000) // replaced 65sec to 15sec for testing purpose
 		{
-			TIMERData.ul65SecCntr = 0;
+			TIMERData.ul15SecCntr = 0;
 			// vGEN_eMakeGSMPowerDownIfBattNotPresent_Exe();
-			bMQTT_PublishVehicleState_Exe();
+			bMQTT_Publish_VehicleState();
 			vAPP_iVehicleRunStatusAction_Exe();
-			vAPP_iReadOTACmdFrmSMS_Exe();
+			// vAPP_iReadOTACmdFrmSMS_Exe();
 		}
 		else
 		{
@@ -250,8 +252,10 @@ int main(void)
 		if (TIMERData.ul300SecCntr >= 3000) // 1sec = 1000ms.
 		{
 			TIMERData.ul300SecCntr = 0;
+			bMQTT_Publish_CriticalData();
+			bMQTT_Publish_ResetFWcheckkDateData();
 			vFTP_eCheckFTPServerForFWUpdate_Exe();
-//			HAL_UART_Transmit(&huart1, (uint8_t *)"OTA not done\n", 13, 500);
+			// HAL_UART_Transmit(&huart1, (uint8_t *)"OTA not done\n", 13, 500);
 		}
 
 		if (TIMERData.uiLEDCntr > 200)
@@ -300,11 +304,11 @@ void vAPP_eSendLiveDataAtTxRate_Exe(void)
 // Name			: vAPP_iReadOTAFrmSMS_Exe
 // Objective	: Read OTA Command from SMS
 // ============================================================================
-static void vAPP_iReadOTACmdFrmSMS_Exe(void)
-{
-	vOTA_eReadSMSOTACmdFromSIM_Exe();
-	vOTA_eReadSMSOTACmdFromME_Exe();
-}
+// static void vAPP_iReadOTACmdFrmSMS_Exe(void)
+// {
+// 	vOTA_eReadSMSOTACmdFromSIM_Exe();
+// 	vOTA_eReadSMSOTACmdFromME_Exe();
+// }
 
 // ============================================================================
 // Name			: ucAPP_iSetVehicleRunStatus_Exe
@@ -511,10 +515,10 @@ bool SendDataOverMQTT_Exe(void)
 
 	do
 	{
-		bStatus = bMQTT_CheckAndConnect_Exe(); // Check broker connection
+		bStatus = bMQTT_CheckAndConnect_Exe(APPCONFIG.cIMEI); // Check broker connection
 		if (bStatus == TRUE)
 		{
-			bStatus = bMQTT_PublishPayload_Exe(); // Publish live data
+			bMQTT_PublishPayload_Exe(); // Publish live data
 		}
 
 		ucTry++;

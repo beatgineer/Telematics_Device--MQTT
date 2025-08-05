@@ -5,16 +5,36 @@ To publish message on MQTT :
 
 
 To receive message on MQTT :
-			    mosquitto_sub -h 13.235.101.231 -t rev25 -u RovoSync -P Yt7rt4hgTVhfY
+
+*Receive msg on various topics:
+1). Topic: rev25
+	mosquitto_sub -h 13.235.101.231 -t rev25 -u RovoSync -P Yt7rt4hgTVhfY
+
+2). Topic: 861736071467671
+	mosquitto_sub -h 13.235.101.231 -t 861736071467671 -u RovoSync -P Yt7rt4hgTVhfY
 
 
 
 /==================================START STOP Vehicle=====================================================================/
 
 To START vehicle : 
-		  mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m '{"cmd":"start"}' -u RovoSync -P Yt7rt4hgTVhfY
+		  mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m "Start" -u RovoSync -P Yt7rt4hgTVhfY
 
 To STOP vehicle : 
-		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m '{"cmd":"stop"}' -u RovoSync -P Yt7rt4hgTVhfY
+		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m "Stop" -u RovoSync -P Yt7rt4hgTVhfY
+
+
+/==================================DIAGNOSE Vehicle=====================================================================/
+
+To DIAGNOSE vehicle : 
+		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m  "Diagnose" -u RovoSync -P Yt7rt4hgTVhfY
+
+
+/==================================Reset Firmware-Checked Date=====================================================================/
+
+To DIAGNOSE vehicle : 
+		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m  "Reset_FWChkDate" -u RovoSync -P Yt7rt4hgTVhfY
+
+
 
 

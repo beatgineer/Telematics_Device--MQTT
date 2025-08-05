@@ -25,7 +25,8 @@
 
 TsFTPData FTPData;
 extern TsAPP_eTimer TIMERData;
-extern TsConfig APPCONFIG;
+// extern TsConfig APPCONFIG;
+extern TsAPP_eConfig APPCONFIG;
 extern TsAPP APPStatus;
 extern TsGSMData GSMData;
 extern TsGSMStatus GSMStatus;
@@ -99,7 +100,7 @@ void vFTP_eCheckFTPServerForFWUpdate_Exe(void)
 			// Get Hour in BCD: HH = GSMData.cRTC[11..12]
 			FTPData.GSMTime = ((GSMData.cRTC[11] - '0') << 4) | (GSMData.cRTC[12] - '0');
 
-			if ((FTPData.GSMTime >= FW_UPDATE_HRS_MIN) && (FTPData.GSMTime <= FW_UPDATE_HRS_MAX))
+			if (((FTPData.GSMTime >= FW_UPDATE_HRS_MIN) && (FTPData.GSMTime <= FW_UPDATE_HRS_MAX)) || FTPData.ucFWCheckedDate == 0x00)
 			{
 				if ((BATTStatus.bBATTStatus == BATTERY_PRESENT) &&
 					(GSMStatus.ucGSMSignalStatus == GSM_SIGNAL_LEVEL_OK) &&
@@ -111,12 +112,12 @@ void vFTP_eCheckFTPServerForFWUpdate_Exe(void)
 					vEEPROM_eWriteByte_Exe(EEPROM_ADDR_FW_UPDATE_STATUS, CHK_VERSION_UPDATE);
 
 					vEEPROM_eWriteByte_Exe(EEPROM_ADDR_FW_CHECKED_DATE, FTPData.ucFWCheckedDate);
-
+					bMQTT_SendPublishCmd_Exe(APPCONFIG.cIMEI, "Starting FOTA update");
 					// vGSM_eCloseSocket_Exe(LOCATION_SOCKET_ID);
 					vMQTT_Disconnect_Exe();
 					// vAPP_eFeedTheWDT_Exe();
 					HAL_Delay(100);
-					HAL_UART_Transmit(&huart1, (uint8_t *)"HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n", strlen("HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n"), 500);
+					// HAL_UART_Transmit(&huart1, (uint8_t *)"Starting FOTA update\n", strlen("Starting FOTA update\n"), 500);
 					NVIC_SystemReset();
 				}
 			}

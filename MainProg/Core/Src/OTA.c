@@ -47,8 +47,10 @@ const char *cOTA_eOTAResponseTbl [] =
 	"Signal Level is Low",			// 9
 };
 
-static uint8_t ucGSM_iReadAndDeleteSMS_Exe(uint8_t ucTotalSMS, uint8_t ucPendingSMS);
+// static uint8_t ucGSM_iReadAndDeleteSMS_Exe(uint8_t ucTotalSMS, uint8_t ucPendingSMS);
 
+#if 0
+/*Commented as the SMS feature is not needed in MQTT based IOT project
 // ============================================================================
 // Name			: vOTA_eInit
 // Objective	: Initialise OTA Module
@@ -63,6 +65,7 @@ void vOTA_eInit(void)
 //	OTAData.ucOTACmdIndex  					= 0xFF;
 //	OTAData.ucOTASMSSentStatus				= FALSE;
 }
+
 
 // ============================================================================
 // Name			: ucOTA_eReadOTACommandFromSMS_Exe
@@ -381,3 +384,4 @@ void vOTA_eExecuteOTACmd_Exe(uint8_t ucOTACmdIndex)
 	}
 }
 
+#endif

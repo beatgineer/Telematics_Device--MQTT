@@ -321,9 +321,12 @@ typedef union
 		bool bAPNStatus : 1;		   // 0 - Not Set, 1 - APN Set
 		bool bRTCStatus : 1;		   // 0 - Not Valid, 1 - Valid
 
-		bool bMQTTConnected : 1; // 0 - Not Connected, 1 - Connected
+		bool bMQTTConnected : 1;   // 0 - Not Connected, 1 - Connected
+		bool GSM_MessageReady : 1; // 0 - no, 1 - Ready
 
-		bool bMQTTVehicleCmd : 1; // 0 - STOP, 1 - START
+		bool bMQTTVehicleCmd : 1;	   // 0 - STOP, 1 - START
+		bool bMQTTCriticalDataCmd : 1; // 0 - STOP, 1 - START
+		bool bMQTTFWchkStatus : 1; // 0 - STOP, 1 - START
 
 		bool bPwrDownStatus : 1; // 0 - GSM Active, 1 - Power Down,
 		bool bFWSMSPending : 1;	 // 0 - No, 1 - Pending
@@ -334,7 +337,7 @@ typedef union
 typedef enum
 {
 	MQTTCOMMAND_SETVEHICLESTOP, // 0
-	MQTTCOMMAND_SETVEHICLERUN, // 1
+	MQTTCOMMAND_SETVEHICLERUN,	// 1
 } MQTTCommand;
 
 #pragma pack(push, 1)
@@ -401,19 +404,13 @@ void vGSM_eReadGPRSStatus_Exe(uint8_t ucPDPContextID);
 void vGSM_eReStartGSM_Exe(void);
 void vGSM_eTurnOFFGSM_Exe(void);
 void vGSM_eSoftOFFGSM_Exe(void);
-bool bGSM_eCheckPendingSMSFromSIM_Exe(void);
-bool bGSM_eCheckPendingSMSFromME_Exe(void);
-bool bGSM_eGetPendingSMS_Exe(uint8_t ucSMSStorage);
-uint8_t ucGSM_eReadSMS_Exe(uint8_t ucSMSIndex);
-bool bGSM_eDeleteSMS_Exe(uint8_t ucSMSIndex);
+// bool bGSM_eCheckPendingSMSFromSIM_Exe(void);
+// bool bGSM_eCheckPendingSMSFromME_Exe(void);
+// bool bGSM_eGetPendingSMS_Exe(uint8_t ucSMSStorage);
+// uint8_t ucGSM_eReadSMS_Exe(uint8_t ucSMSIndex);
+// bool bGSM_eDeleteSMS_Exe(uint8_t ucSMSIndex);
 bool bGSM_eSendSMS_Exe(char *cReceiverMobile, char *cMessage);
-bool bMQTT_CheckAndConnect_Exe(void);
-bool bMQTT_PublishPayload_Exe(void);
-bool bMQTT_PublishVehicleState_Exe(void);
-bool bMQTT_SendPublishCmd_Exe(const char *topic, const char *payload);
-bool bMQTT_SubscribeTopic_Exe(const char *topic);
-void vGSM_ParseMQTTMessage(const char *mqttLine);
-void vMQTT_Disconnect_Exe(void);
+
 void vGSM_SendString(const char *str);
 void vGSM_SendByte(uint8_t byte);
 bool ucGSM_eWaitForATResponse(const char *expected, uint32_t pollDelay, uint32_t timeout);

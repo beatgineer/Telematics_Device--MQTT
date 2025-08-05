@@ -1475,6 +1475,9 @@
                     <name>$PROJ_DIR$\..\Core\Src\MCUFlash.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\MQTT.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\ODO.c</name>
                 </file>
                 <file>

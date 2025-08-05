@@ -642,7 +642,7 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>1</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
@@ -650,7 +650,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>standalone_IoT-ver_1.0.hex</state>
+                    <state>standalone_IoT-ver_1.0.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -1131,6 +1131,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\MCUFlash.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\MQTT.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\ODO.c</name>
