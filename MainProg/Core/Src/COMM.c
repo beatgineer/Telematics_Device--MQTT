@@ -184,6 +184,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       {
         GSMStatus.GSM_MessageReady = 1;
       }
+      if (strstr((char *)GSM_DataBuffer, "+QMTSTAT:") != NULL)
+      {
+//        GSMStatus.bMQTTDisconnected = 1;
+      }
     }
     else
     {

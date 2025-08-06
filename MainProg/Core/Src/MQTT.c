@@ -91,7 +91,7 @@ bool bMQTT_CheckAndConnect_Exe(const char *topic)
 
     vAPP_eFeedTheWDT_Exe();
 
-    // bMQTT_SubscribeTopic_Exe(APPCONFIG.cIMEI);
+    bMQTT_SubscribeTopic_Exe(APPCONFIG.cIMEI);
 
     // Update connection status and return
     GSMStatus.bMQTTConnected = bStatus;
@@ -145,64 +145,8 @@ bool bMQTT_SendPublishCmd_Exe(const char *topic, const char *payload)
     return bStatus;
 }
 
-// void vGSM_ParseMQTTMessage(const char *mqttLine)
-// {
-//     const char *payloadStart = strchr(mqttLine, ',');
-//     if (payloadStart == NULL)
-//         return;
-
-//     // Move to second comma
-//     payloadStart = strchr(payloadStart + 1, ',');
-//     if (payloadStart == NULL)
-//         return;
-
-//     payloadStart += 2; // Skip comma and first quote
-
-//     char payload[128] = {0};
-//     const char *payloadEnd = strrchr(payloadStart, '"');
-//     if (payloadEnd == NULL)
-//         return;
-
-//     size_t len = payloadEnd - payloadStart;
-//     if (len >= sizeof(payload))
-//         len = sizeof(payload) - 1;
-
-//     strncpy(payload, payloadStart, len);
-//     payload[len] = '\0';
-
-//     if (strstr(payload, "start"))
-//     {
-// APPStatus.bVehRunStatus = VEHICLE_RUN;
-// GSMStatus.bMQTTVehicleCmd = 1;
-//         // HAL_UART_Transmit(&huart1, (uint8_t *)"VEHICLE START\n", 13, 500);
-//     }
-//     else if (strstr(payload, "stop"))
-//     {
-//         APPStatus.bVehRunStatus = VEHICLE_STOP;
-//         GSMStatus.bMQTTVehicleCmd = 1;
-//         // HAL_UART_Transmit(&huart1, (uint8_t *)"VEHICLE STOP\n", 13, 500);
-//     }
-
-// #ifdef DEBUG
-//     printf("MQTT Payload: %s\n", payload);
-// #endif
-// }
-
 void vMQTT_Incoming_Msg()
 {
-    // if (GSMStatus.GSM_MessageReady == 1)
-    // {
-    // 	GSMStatus.GSM_MessageReady = 0; // Clear flag
-    // if (strstr((char *)GSM_DataBuffer, "+QMTRECV:") != NULL)
-    // {
-    // for (int try = 1; try < 50; try++)
-    // {
-    //     parse_and_transmit_qmtrecv((char *)GSM_DataBuffer);
-    // }
-    // }
-    // memset(GSM_DataBuffer, 0, GSM_BuffSize);
-    // }
-
     if (GSMStatus.GSM_MessageReady == 1)
     {
         GSMStatus.GSM_MessageReady = 0;

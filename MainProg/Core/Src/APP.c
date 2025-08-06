@@ -520,16 +520,14 @@ bool SendDataOverMQTT_Exe(void)
 		{
 			bMQTT_PublishPayload_Exe(); // Publish live data
 		}
-
 		ucTry++;
 
 		if (bStatus == FALSE)
 		{
-			vMQTT_Disconnect_Exe(); // Optional: disconnect on failure
+			GSMStatus.bMQTTDisconnected = 0;
+			vMQTT_Disconnect_Exe(); 
 		}
-
 		vAPP_eFeedTheWDT_Exe();
-
 	} while ((bStatus == FALSE) && (ucTry < 3));
 
 	if (bStatus == TRUE)

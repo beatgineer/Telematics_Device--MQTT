@@ -323,6 +323,7 @@ typedef union
 
 		bool bMQTTConnected : 1;   // 0 - Not Connected, 1 - Connected
 		bool GSM_MessageReady : 1; // 0 - no, 1 - Ready
+		bool bMQTTDisconnected  : 1; // 0 - Connected, 1 - Disonnected
 
 		bool bMQTTVehicleCmd : 1;	   // 0 - STOP, 1 - START
 		bool bMQTTCriticalDataCmd : 1; // 0 - STOP, 1 - START
