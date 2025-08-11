@@ -64,6 +64,7 @@ D:\BZ\PROJECTS\Embedded\ Firmware\BZ\Standalone_IoT\Firmware\Standalone_IOT\Stan
   D:\BZ\PROJECTS\Embedded\ Firmware\BZ\Standalone_IoT\Firmware\Standalone_IOT\Standalone_IOT\ (MQTT\ with\ BL)\MainProg\EWARM\..\Core\Inc\E2PROM_I2C.h \
   D:\BZ\PROJECTS\Embedded\ Firmware\BZ\Standalone_IoT\Firmware\Standalone_IOT\Standalone_IOT\ (MQTT\ with\ BL)\MainProg\EWARM\..\Core\Inc\CAN.h \
   D:\BZ\PROJECTS\Embedded\ Firmware\BZ\Standalone_IoT\Firmware\Standalone_IOT\Standalone_IOT\ (MQTT\ with\ BL)\MainProg\EWARM\..\Core\Inc\FTP.h \
+  D:\BZ\PROJECTS\Embedded\ Firmware\BZ\Standalone_IoT\Firmware\Standalone_IOT\Standalone_IOT\ (MQTT\ with\ BL)\MainProg\EWARM\..\Core\Inc\MQTT.h \
   C:\Program\ Files\IAR\ Systems\Embedded\ Workbench\ 9.1\arm\inc\c\string.h \
   C:\Program\ Files\IAR\ Systems\Embedded\ Workbench\ 9.1\arm\inc\c\DLib_Product_string.h \
   C:\Program\ Files\IAR\ Systems\Embedded\ Workbench\ 9.1\arm\inc\c\stdlib.h \

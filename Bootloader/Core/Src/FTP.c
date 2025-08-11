@@ -18,6 +18,7 @@
 
 TsFTPData FTPData;
 TuFTPStatus FTPStatus;
+TsAPP_eConfig APPCONFIG;
 extern TsGSMData GSMData;
 extern TsGSMStatus GSMStatus;
 extern TsDefaultConfig DEFAULTCONFIG;
@@ -1224,28 +1225,30 @@ static bool bFTP_iWriteAndVerifyCRCOfMCUFlash_Exe(uint8_t ucAPPNum, uint32_t ulR
     {
         ulMCUFlashAddress = IMAGE1_MCU_FLASH_ADDR;
         bStatus = true;
-        // dbgLen = snprintf(dbgBuf, sizeof(dbgBuf),
-        //                   "[DEBUG] Selected VALID_APP1, MCUFlashAddr=0x%08lX\r\n",
-        //                   ulMCUFlashAddress);
-        // HAL_UART_Transmit(&huart1, (uint8_t *)dbgBuf, dbgLen, HAL_MAX_DELAY);
+        // bMQTT_SendPublishCmd_Exe(APPCONFIG.cIMEI, "Starting FOTA update");
+
+        dbgLen = snprintf(dbgBuf, sizeof(dbgBuf),
+                          "[DEBUG] Selected VALID_APP1, MCUFlashAddr=0x%08lX\r\n",
+                          ulMCUFlashAddress);
+        HAL_UART_Transmit(&huart1, (uint8_t *)dbgBuf, dbgLen, HAL_MAX_DELAY);
     }
     else if (ucAPPNum == VALID_APP2)
     {
         ulMCUFlashAddress = IMAGE2_MCU_FLASH_ADDR;
         bStatus = true;
-        // dbgLen = snprintf(dbgBuf, sizeof(dbgBuf),
-        //                   "[DEBUG] Selected VALID_APP2, MCUFlashAddr=0x%08lX\r\n",
-        //                   ulMCUFlashAddress);
-        // HAL_UART_Transmit(&huart1, (uint8_t *)dbgBuf, dbgLen, HAL_MAX_DELAY);
+        dbgLen = snprintf(dbgBuf, sizeof(dbgBuf),
+                          "[DEBUG] Selected VALID_APP2, MCUFlashAddr=0x%08lX\r\n",
+                          ulMCUFlashAddress);
+        HAL_UART_Transmit(&huart1, (uint8_t *)dbgBuf, dbgLen, HAL_MAX_DELAY);
     }
     else
     {
         ulMCUFlashAddress = 0;
         bStatus = false;
-        // dbgLen = snprintf(dbgBuf, sizeof(dbgBuf),
-        //                   "[DEBUG] Invalid APPNum! ulMCUFlashAddress=0x%08lX\r\n",
-        //                   ulMCUFlashAddress);
-        // HAL_UART_Transmit(&huart1, (uint8_t *)dbgBuf, dbgLen, HAL_MAX_DELAY);
+        dbgLen = snprintf(dbgBuf, sizeof(dbgBuf),
+                          "[DEBUG] Invalid APPNum! ulMCUFlashAddress=0x%08lX\r\n",
+                          ulMCUFlashAddress);
+        HAL_UART_Transmit(&huart1, (uint8_t *)dbgBuf, dbgLen, HAL_MAX_DELAY);
     }
 
     ulFlashDataAddr = ulMCUFlashAddress + (uiPageNum * MCU_FLASH_PAGE_SIZE);

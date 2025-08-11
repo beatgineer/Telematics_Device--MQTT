@@ -18,16 +18,18 @@
 #include "E2PROM_I2C.h"
 #include "CAN.h"
 #include "FTP.h"
+#include "MQTT.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
-
 //*****************************************************************************
-// EXTERNAL VARIABLES
+// Buffer
 //*****************************************************************************
 extern uint8_t ucCAN_eRxData[8];
-
+//*****************************************************************************
+// Structures
+//*****************************************************************************
 TsGSMData GSMData;
 TsGSMStatus GSMStatus;
 extern TsFTPData FTPData;
@@ -36,12 +38,14 @@ extern TsAPP APPStatus;
 extern const TsEEPROMConfig EEPROMCONFIG;
 extern TsAPP_eTimer TIMERData;
 extern TsGPSData GPSData;
+extern TsMQTTStatus MQTTStatus;
+//*****************************************************************************
+// Handles
+//*****************************************************************************
 extern TIM_HandleTypeDef htim2;
-
 extern TIM_HandleTypeDef htim3;
 extern TsAPP_eConfig APPCONFIG;
 
-/////////////////////////////////////////////////////////////////
 
 const char *cGSM_QUECTEL_eATCommandTbl[] =
     {
@@ -636,13 +640,13 @@ void vGSM_eStartGSM_Exe(void)
 
     vGSM_eDisableGPRS_Exe(PDP_CONTEXT_ID);
 
-    if (GSMStatus.bMQTTConnected)
+    if (MQTTStatus.bMQTTConnected)
     {
         vMQTT_Disconnect_Exe();
     }
     else
     {
-        GSMStatus.bMQTTConnected = false;
+        MQTTStatus.bMQTTConnected = false;
     }
 }
 

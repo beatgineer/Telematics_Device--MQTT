@@ -4,39 +4,36 @@
  *  Created on: April 15, 2025
  *      Author: Brij.Z
  */
-
-//*****************************************************************************
-//   INCLUDE
-//*****************************************************************************
 #include "stm32g0xx_hal.h"
 #include "stm32g0xx.h"
 #include "GPS.H"
 #include "COMM.H"
 #include "UTL.H"
 #include "APP.h"
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-//*****************************************************************************
-// EXTERNAL VARIABLES
-//*****************************************************************************
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+void vGPS_eInit(void);
+uint8_t ucGPS_eGetGPSPowerStatus_Exe(void);
+void vGPS_eSetGPSPower_Exe(uint8_t ucGPSPwrStatus);
+void vGPS_eStartGPS_Exe(void);
+bool bGPS_eGetGPSLoc_Exe(void);
+void vGPS_eReadGPSData_Exe(void);
+static void vGPS_iResetGPS_Exe(void);
+void vGPS_eOperateGPSLED_Exe(void);
 
+//*****************************************************************************
+// Structures
+//*****************************************************************************
 TsGPSData GPSData;
 extern TsGSMData GSMData;
 extern TsGSMStatus GSMStatus;
 extern TsUARTData UARTData;
 extern TsAPPData APPData;
-
-//*****************************************************************************
-// INTERNAL VARIABLES
-//*****************************************************************************
-
-//*****************************************************************************
-// STRUCTURE VARIABLES
-//*****************************************************************************
-static void vGPS_iResetGPS_Exe(void);
 
 // ============================================================================
 // Name			: vGPS_eInit

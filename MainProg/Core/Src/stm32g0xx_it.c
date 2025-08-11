@@ -158,6 +158,7 @@ void SysTick_Handler(void)
   TIMERData.ul15SecCntr++;
   TIMERData.uiTimer360mS++;
   TIMERData.ul300SecCntr++;
+  TIMERData.ul1SecCntr++;
 
   TIMERData.ulPresentTxRate++;
   // GSMHealth.uiRITimer++;

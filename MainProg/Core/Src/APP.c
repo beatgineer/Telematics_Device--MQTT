@@ -4,8 +4,8 @@
   * @brief         : Application Layer
   ******************************************************************************
   // APP
-  // Version  : 1301,
-  // Author   : Brij Z
+  // Version  : 0002,
+  // Author   : B.Zaveri
   // Date	  : 23-03-2025
   ******************************************************************************
   MCU : STM32G0B1RC 256kB Flash, RAM 144kB
@@ -80,16 +80,14 @@ void MX_TIM2_Init(void);
 static void MX_CRC_Init(void);
 static void vAPP_iReadOTACmdFrmSMS_Exe(void);
 void vAPP_iVehicleRunStatusAction_Exe(void);
-
 // ============================================================================
 jmp_buf jmpBuffer;
 uint16_t uiDelayCounts;
-
 // ============================================================================
 // BUFFERS
 // ============================================================================
 char cAPP_eGlobalBuffer[500];
-char cAPP_eGPSDataBuffer[900]; // increased buffer size from 300 to 900 in order to add other parameters into the buffer
+char cAPP_eGPSDataBuffer[900]; 
 // ============================================================================
 // HANDLES
 // ============================================================================
@@ -108,10 +106,11 @@ extern TsGSMStatus GSMStatus;
 extern TsGSMData GSMData;
 extern TsCAN CANData;
 extern TuCANStatus CANStatus;
-extern TsOTAData OTAData;
 extern TsOdo ODOData;
 extern TsBATTData BATTData;
 extern TsBATTStatus BATTStatus;
+extern TsMQTTStatus MQTTStatus;
+
 // =============================================================================
 
 int main(void)
@@ -181,7 +180,6 @@ int main(void)
 	vGEN_eLoadTxRate_Exe();
 
 	APPStatus.bIgnStatusPrev = 0;
-	// APPStatus.bIgnStatusPrev = APPStatus.bIgnStatus;
 	TIMERData.ulPresentTxRate = TIMERData.ulTxRate;
 
 	TIMERData.ul18SecCntr = 0;
@@ -193,12 +191,10 @@ int main(void)
 	while (1)
 	{
 		vAPP_eFeedTheWDT_Exe();
-		vMQTT_Incoming_Msg();
 		vCAN_eReadCANData_Exe();
 		vCAN_eGetBattID_Exe();
 		vAPP_iReadIgnStatus_Exe();
 		vAPP_eSendLiveDataAtTxRate_Exe();
-		// vBATT_eReadIntBATTVolt_Exe();
 
 		//-----------------------------------
 		// Task based Jobs
@@ -237,25 +233,31 @@ int main(void)
 		if (TIMERData.ul15SecCntr >= 15000) // replaced 65sec to 15sec for testing purpose
 		{
 			TIMERData.ul15SecCntr = 0;
-			// vGEN_eMakeGSMPowerDownIfBattNotPresent_Exe();
 			bMQTT_Publish_VehicleState();
 			vAPP_iVehicleRunStatusAction_Exe();
-			// vAPP_iReadOTACmdFrmSMS_Exe();
 		}
 		else
 		{
 		}
 
 		//-----------------------------------
-		// Firmware Update (300sec Timer)
+		// MQTT message publisher
 		//-----------------------------------
-		if (TIMERData.ul300SecCntr >= 3000) // 1sec = 1000ms.
+		if (TIMERData.ul1SecCntr >= 1000) // 1sec = 1000ms.
 		{
-			TIMERData.ul300SecCntr = 0;
+			TIMERData.ul1SecCntr = 0;
+			vMQTT_Incoming_Msg();
 			bMQTT_Publish_CriticalData();
 			bMQTT_Publish_ResetFWcheckkDateData();
+		}
+
+		//-----------------------------------
+		// Firmware Update (300sec Timer)
+		//-----------------------------------
+		if (TIMERData.ul300SecCntr >= 10000) // 1sec = 1000ms.
+		{
+			TIMERData.ul300SecCntr = 0;
 			vFTP_eCheckFTPServerForFWUpdate_Exe();
-			// HAL_UART_Transmit(&huart1, (uint8_t *)"OTA not done\n", 13, 500);
 		}
 
 		if (TIMERData.uiLEDCntr > 200)
@@ -522,10 +524,11 @@ bool SendDataOverMQTT_Exe(void)
 		}
 		ucTry++;
 
-		if (bStatus == FALSE)
+		 if (bStatus == FALSE || (MQTTStatus.MQTT_ErrCode == (CONNECTION_RESET_CLOSED || PINGREQ_FAILED || CONNECT_PACKET_FAILED || CONNACK_PACKET_FAILED || SERVER_INITIATED_DISCONNECT || CLIENT_PACKET_FAILURE_CLOSE || LINK_NOT_ALIVE_SERVER_UNAVAIL)))
+//		if (bStatus == FALSE )
 		{
-			GSMStatus.bMQTTDisconnected = 0;
-			vMQTT_Disconnect_Exe(); 
+			MQTTStatus.MQTT_ErrCode = 0;
+			vMQTT_Disconnect_Exe();
 		}
 		vAPP_eFeedTheWDT_Exe();
 	} while ((bStatus == FALSE) && (ucTry < 3));
@@ -536,7 +539,7 @@ bool SendDataOverMQTT_Exe(void)
 		GSMData.ucErrorCntr = 0;
 		GSMData.ucNoSocketCntr = 0;
 
-		APPStatus.uiMsgCntr++;
+		// APPStatus.uiMsgCntr++;
 		vGEN_eLoadTxRate_Exe();
 	}
 

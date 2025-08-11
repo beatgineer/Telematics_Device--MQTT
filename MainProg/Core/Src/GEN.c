@@ -23,6 +23,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+void vGEN_eLoadAndParseData_Exe(uint8_t ucDataType, uint8_t ucEventType);
+void vGEN_eLoadTxRate_Exe(void);
+void vGEN_eMakeIntBattChargingOnOff_Exe(bool bStatus);
+void vGEN_eONBattChg_Exe(void);
+void vGEN_eMakeGSMPowerDownIfBattNotPresent_Exe(void);
+void vGEN_eSendBattRemovedEventData_Exe(void);
+
+
+// ============================================================================
+// Structures
+// ============================================================================
 extern TsOdo ODOData;
 extern TsConfig CONFIG;
 extern TsEEPROMConfig EEPROMCONFIG;

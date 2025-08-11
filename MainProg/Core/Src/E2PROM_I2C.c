@@ -1,3 +1,10 @@
+// ============================================================================
+// Module	: E2PROM_I2C.c
+// Version	: A
+// Author	: B.Zaveri
+// Date		: 06-6-2025
+// ============================================================================
+
 #include "main.h"
 #include "APP.h"
 #include "E2PROM_I2C.h"
@@ -8,11 +15,20 @@
 
 extern I2C_HandleTypeDef hi2c1;
 
+
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+void vEEPROM_eInit(void);
+void MX_I2C1_Init(void);
+void vEEPROM_eWriteByte_Exe(uint16_t uiMemAddress, uint8_t ucData);
+void vEEPROM_eWriteBytes_Exe(uint16_t uiAddr, char *pBuffer, uint16_t uiBytesToWrite);
+uint8_t ucEEPROM_eReadByte_Exe(uint16_t uiMemAddress);
+void vEEPROM_eReadBytes_Exe(uint16_t uiMemAddress, uint8_t *ucData, uint16_t uiSize);
 static void vEEPROM_iMakeWPDisable_Exe(void);
 static void vEEPROM_iMakeWPEnable_Exe(void);
-void MX_I2C1_Init(void);
+void vEEPROM_Reset(void);
 
-/*****************************************************************************************************************************************/
 
 void vEEPROM_eInit(void)
 {

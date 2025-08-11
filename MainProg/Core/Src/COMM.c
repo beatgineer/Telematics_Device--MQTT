@@ -2,31 +2,43 @@
  * COMM.c
  *
  *  Created on: Mar 1, 2025
- *      Author: 700538
+ *      Author: B.Zaveri
  */
 
 #include "main.h"
 #include "COMM.H"
 #include "APP.H"
 #include "GSM.H"
+#include "MQTT.H"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stm32g0b1xx.h>
 
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+void vCOMM_eUSART1Init(void);
+void vCOMM_eUSART3Init(void);
+void vCOMM_eTxString_Exe(UART_HandleTypeDef *USARTx, char *pcMessage, uint16_t uiTimeOut);
+void print(char *pcMessage);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle);
+// ============================================================================
+// Handles
+// ============================================================================
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart3;
 I2C_HandleTypeDef hi2c1;
 TIM_HandleTypeDef htim16;
-
-//*****************************************************************************
-// INTERNAL VARIABLES
-
+// ============================================================================
+// VARIABLES
+// ============================================================================
 TsUARTData UARTData;
 extern TsGSMData GSMData;
 extern TsGSMStatus GSMStatus;
+extern TsMQTTStatus MQTTStatus;
 
-//*****************************************************************************
 
 void MX_TIM16_Init(void)
 {
@@ -182,18 +194,18 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       // Optional: check for newline in a very fast way
       if (strstr((char *)GSM_DataBuffer, "+QMTRECV:") != NULL)
       {
-        GSMStatus.GSM_MessageReady = 1;
+        MQTTStatus.IncomingMsg = 1;
       }
       if (strstr((char *)GSM_DataBuffer, "+QMTSTAT:") != NULL)
       {
-//        GSMStatus.bMQTTDisconnected = 1;
+       MQTTStatus.bMQTTErrorGenerated = 1;
+       parse_and_transmit_qmtstat((char *)GSM_DataBuffer);
       }
     }
     else
     {
       GSM_RxCntr = 0; // prevent overflow
     }
-
     GSM_TimeOut = 0;
     HAL_UART_Receive_IT(GSMComPortHandle, (uint8_t *)GSM_RxOneByte, 1);
   }

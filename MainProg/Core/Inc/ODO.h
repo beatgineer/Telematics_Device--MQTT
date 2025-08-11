@@ -32,10 +32,10 @@ extern "C"
         uint8_t ucSig[4];
 
         uint16_t uiOdoDistVal;
-        uint32_t ucOdoVal[8];
+        uint32_t ucOdoVal[8]; 
         uint32_t ulOdoValInKm; 
         uint32_t ulOdoValInKmPrev;
-        uint32_t ulOdoValInMi;
+        // uint32_t ulOdoValInMi;
 
         char cStoreODO[10];
 
@@ -47,7 +47,7 @@ extern "C"
         uint16_t uiTripBDist;
         uint8_t ucTripB[5];
         uint16_t uiTripBValInKm;
-        uint16_t uiTripBValInMi;
+        // uint16_t uiTripBValInMi;
 
         //	bool		bOdoAndTripValChanged;	// 0 - Odo & Trip Val not Changed, Do not Store, 1 - Odo & Trip Val Changed, Store
 
@@ -59,7 +59,7 @@ extern "C"
 
         bool bWhPerKmCalculated; // 0 - Not, 1 - Calculated
         uint8_t ucWhPerKm;
-        uint8_t ucWhPerMi;
+        // uint8_t ucWhPerMi;
         //	float		fCumWh;
         char cWh[3];
         //	float		fTotalConsumedWh;

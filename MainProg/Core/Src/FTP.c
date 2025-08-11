@@ -23,6 +23,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+void vFTP_eInit(void);
+void vFTP_eCheckFTPServerForFWUpdate_Exe(void);
+
+// ============================================================================
+// Structures
+// ============================================================================
 TsFTPData FTPData;
 extern TsAPP_eTimer TIMERData;
 // extern TsConfig APPCONFIG;
@@ -32,20 +41,20 @@ extern TsGSMData GSMData;
 extern TsGSMStatus GSMStatus;
 extern TsGPSData GPSData;
 extern TsBATTStatus BATTStatus;
-extern TsOTAData OTAData;
+//extern TsOTAData OTAData;
 extern TsEEPROMConfig EEPROMCONFIG;
 extern TsCAN CANData;
 extern TuCANStatus CANStatus;
-
 extern CRC_HandleTypeDef hcrc;
 extern UART_HandleTypeDef huart3;
 
-//======================================================================
+//===========================================================================
+// Constant Definitions
+//===========================================================================
 const uint8_t ucFTP_iStartImmobFWUpdate[8] = {0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
 const uint8_t ucCAN_iEndCRCFile[8] = {0x89, 0x9A, 0xAB, 0xBC, 0xCD, 0xEF, 0xFE, 0xED};
 const uint8_t ucCAN_iStartBINFile[8] = {0x9A, 0xAB, 0xBC, 0xCD, 0xEF, 0xFE, 0xED, 0xDC};
 const uint8_t ucAPP_iAck[8] = {'A', 'C', 'K', 0x0, 0x0, 0x0, 0x0, 0x0};
-
 extern char msg[128]; // Debug message buffer
 extern UART_HandleTypeDef huart1;
 
@@ -100,9 +109,10 @@ void vFTP_eCheckFTPServerForFWUpdate_Exe(void)
 			// Get Hour in BCD: HH = GSMData.cRTC[11..12]
 			FTPData.GSMTime = ((GSMData.cRTC[11] - '0') << 4) | (GSMData.cRTC[12] - '0');
 
-			if (((FTPData.GSMTime >= FW_UPDATE_HRS_MIN) && (FTPData.GSMTime <= FW_UPDATE_HRS_MAX)) || FTPData.ucFWCheckedDate == 0x00)
+			// if (((FTPData.GSMTime >= FW_UPDATE_HRS_MIN) && (FTPData.GSMTime <= FW_UPDATE_HRS_MAX)) || FTPData.ucFWCheckedDate == 0x00)
+			if (((FTPData.GSMTime >= FW_UPDATE_HRS_MIN) && (FTPData.GSMTime <= FW_UPDATE_HRS_MAX)))
 			{
-				if ((BATTStatus.bBATTStatus == BATTERY_PRESENT) &&
+				if ((BATTStatus.bMainBATTVoltStatus == BATTERY_PRESENT) &&   //BATTStatus.bBATTStatus == BATTERY_PRESENT
 					(GSMStatus.ucGSMSignalStatus == GSM_SIGNAL_LEVEL_OK) &&
 					(APPStatus.bIgnStatus == IGN_OFF))
 				{

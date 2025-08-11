@@ -321,13 +321,7 @@ typedef union
 		bool bAPNStatus : 1;		   // 0 - Not Set, 1 - APN Set
 		bool bRTCStatus : 1;		   // 0 - Not Valid, 1 - Valid
 
-		bool bMQTTConnected : 1;   // 0 - Not Connected, 1 - Connected
 		bool GSM_MessageReady : 1; // 0 - no, 1 - Ready
-		bool bMQTTDisconnected  : 1; // 0 - Connected, 1 - Disonnected
-
-		bool bMQTTVehicleCmd : 1;	   // 0 - STOP, 1 - START
-		bool bMQTTCriticalDataCmd : 1; // 0 - STOP, 1 - START
-		bool bMQTTFWchkStatus : 1; // 0 - STOP, 1 - START
 
 		bool bPwrDownStatus : 1; // 0 - GSM Active, 1 - Power Down,
 		bool bFWSMSPending : 1;	 // 0 - No, 1 - Pending
@@ -335,11 +329,7 @@ typedef union
 	};
 	uint8_t ucData[3];
 } TsGSMStatus;
-typedef enum
-{
-	MQTTCOMMAND_SETVEHICLESTOP, // 0
-	MQTTCOMMAND_SETVEHICLERUN,	// 1
-} MQTTCommand;
+
 
 #pragma pack(push, 1)
 typedef struct
@@ -405,13 +395,7 @@ void vGSM_eReadGPRSStatus_Exe(uint8_t ucPDPContextID);
 void vGSM_eReStartGSM_Exe(void);
 void vGSM_eTurnOFFGSM_Exe(void);
 void vGSM_eSoftOFFGSM_Exe(void);
-// bool bGSM_eCheckPendingSMSFromSIM_Exe(void);
-// bool bGSM_eCheckPendingSMSFromME_Exe(void);
-// bool bGSM_eGetPendingSMS_Exe(uint8_t ucSMSStorage);
-// uint8_t ucGSM_eReadSMS_Exe(uint8_t ucSMSIndex);
-// bool bGSM_eDeleteSMS_Exe(uint8_t ucSMSIndex);
 bool bGSM_eSendSMS_Exe(char *cReceiverMobile, char *cMessage);
-
 void vGSM_SendString(const char *str);
 void vGSM_SendByte(uint8_t byte);
 bool ucGSM_eWaitForATResponse(const char *expected, uint32_t pollDelay, uint32_t timeout);

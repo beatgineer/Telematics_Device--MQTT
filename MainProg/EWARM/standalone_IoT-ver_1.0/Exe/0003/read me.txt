@@ -1,0 +1,8 @@
+Version: 0003
+
+Transmission Rates:
+    10,   // Tx Rate Ign ON (20 sec)
+    20,  // Tx Rate Ign OFF (10 min)
+    3600, // Battery Removed Rate (1 hr)
+
+FOTA update time: 11am-12am

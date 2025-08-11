@@ -107,7 +107,7 @@
 #define EEPROM_ADDR_ODO_DIST (EEPROM_ADDR_BATTID + LEN_ODO_DIST)
 
 // Firmware-update flags (keep these well apart from the config block)
-#define EEPROM_ADDR_FW_UPDATE_STATUS 0x300  // 1 byte
+#define EEPROM_ADDR_FW_UPDATE_STATUS 0x320  // 1 byte
 #define EEPROM_ADDR_FW_CHECKED_DATE  0x314  // 1 byte
 // #define EEPROM_ADDR_IMMOB_VER_NUM    0x0124  // 5 bytes [0x0124..0x0128]
 #define EEPROM_ADDR_IOT_VER_NUM      0x302  // 5 bytes [0x0129..0x012D]

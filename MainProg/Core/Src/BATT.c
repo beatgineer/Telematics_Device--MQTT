@@ -2,7 +2,7 @@
  * APP.c
  *
  *  Created on: Mar 1, 2025
- *      Author: Brij.Z
+ *      Author: B.Zaveri
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -15,6 +15,26 @@
 #include "CAN.h"
 #include <string.h>
 
+
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+static void MX_ADC1_Init(void);
+static void MX_DMA_Init(void);
+void vBATT_eInit(void);
+void vBATT_eReadMainBATTVolt_Exe(void);
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc);
+void vBATT_Start_ADC(void);
+void vBATT_eDetectBatteryPresence(void);
+
+// ============================================================================
+// Handles
+// ============================================================================
+ADC_HandleTypeDef hadc;
+DMA_HandleTypeDef hdma_adc1;
+// ============================================================================
+//  Structures
+// ============================================================================
 TsBATTData BATTData;
 TsBATTStatus BATTStatus;
 extern TsCAN CANData;
@@ -23,12 +43,6 @@ extern TsAPP_eTimer TIMERData;
 extern TsAPPData APPData;
 extern TsGSMStatus GSMStatus;
 extern TsGSMData GSMData;
-
-static void MX_ADC1_Init(void);
-static void MX_DMA_Init(void);
-
-ADC_HandleTypeDef hadc;
-DMA_HandleTypeDef hdma_adc1;
 
 void vBATT_eInit(void)
 {

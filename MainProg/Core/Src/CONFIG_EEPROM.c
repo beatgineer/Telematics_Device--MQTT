@@ -1,8 +1,8 @@
 // ============================================================================
 // Module	: CONFIG
 // Version	: A
-// Author	: AK
-// Date		: 06-12-2021
+// Author	: B.Zaveri
+// Date		: 06-06-2025
 // ============================================================================
 #include "CONFIG_EEPROM.h"
 #include "APP.h"
@@ -12,11 +12,19 @@
 #include "ODO.h"
 #include "CAN.h"
 #include "FTP.h"
+#include "CALIBRATION.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
+void vCONFIGEEPROM_eReadConfigData_Exe(void);
+void vCONFIGEEPROM_eLoadDefaultPar_Exe(void);
+// ============================================================================
+// Structures
+// ============================================================================
 extern TsAPP_eConfig APPCONFIG;
 extern TsAPP APPStatus;
 extern TsGSMData GSMHealth;
@@ -30,45 +38,34 @@ extern TsFTPData FTPData;
 #pragma pack(push, 1)
 const TsConfig CONFIG = {
     VEHICLE_RV400,
-
-    'T', // Protocol, H - HTTP, T - TCP, U - UDP, M - MQTT
-
-    "13.232.191.212", // FTP Server Host Name
-    "21",             // FTP Server Port No.
-    "ecudown",
-    "haD_8A@usw",
-
-    TRUE, // SMS OTA : Authntication: 0 - Disable, 1 - Enable
-    // "+919811451380",		// SMS OTA : Master Mobile No.		// AK
-    //	"+919999134462",		// SMS OTA : Master Mobile No.
-    "+918373958568", // SMS OTA : Master Mobile No.		// Anil
-
-    // "1301", // IOT SW VERSION - Ready for Release
-    "0002", // IOT SW VERSION - Test Version
-    "16052025", // IOT BUILD Date
+    PROTOCOL, // Protocol, H - HTTP, T - TCP, U - UDP, M - MQTT
+    FTP_SERVER_IPADDRESS, // FTP Server Host Name
+    FTP_SERVER_PORTNUM,   // FTP Server Port No.
+    FTP_SERVER_USERNAME,
+    FTP_SERVER_PASSWORD,
+    TRUE,            // SMS OTA : Authntication: 0 - Disable, 1 - Enable
+    SMS_MOBILE_NUMBER, // SMS OTA : Master Mobile No.		// Anil
+    IOT_SW_VERSION, // IOT SW VERSION - Test Version
+    IOT_BUILD_DATE, // IOT BUILD Date
 };
 #pragma pack(pop)
 
 #pragma pack(push, 1)
 const TsEEPROMConfig EEPROMCONFIG = {
     0x11, 0x22, 0x33, 0x44, 0x55, // Signature
-
-    "m2m.myrevolt.com", // APN
-
-    0,                      // Status
-    "13.235.101.231",       // IP address
-    "1883",                 // Port number
-    "RovoSync",             // Username
-    "Yt7rt4hgTVhfY",        // Password
-    "rev25",                // MQTT Topic
-    "ecu.revoltmotors.com", // Domain Name
-
-    10,   // Tx Rate Ign ON (20 sec)
-    600,   // Tx Rate Ign OFF (10 min)
-    3600, // Battery Removed Rate (1 hr)
-
-    "0123456789", // CCID
-    FALSE,        // IMEI & CCID Not written
+    MQTT_APN,                     // APN
+    0,                            // Status
+    MQTT_SERVER_IPADDRESS,        // IP address
+    MQTT_SERVER_PORTNUM,          // Port number
+    MQTT_USERNAME,                // Username
+    MQTT_PASSWORD,                // Password
+    MQTT_TOPIC,                   // MQTT Topic
+    DOMAIN_NAME,       // Domain Name
+    TX_RATE_IGN_ON,               // Tx Rate Ign ON (10 sec)
+    TX_RATE_IGN_OFF,              // Tx Rate Ign OFF (20 sec)
+    TX_RATE_BATT_REMOVED,         // Battery Removed Rate (30 sec)
+    "0123456789",                 // CCID
+    FALSE,                        // IMEI & CCID Not written
 };
 #pragma pack(pop)
 
@@ -141,8 +138,8 @@ void vCONFIGEEPROM_eReadConfigData_Exe(void)
     // VEHICLE RUN STATUS
     APPStatus.bVehRunStatus = ucEEPROM_eReadByte_Exe(EEPROM_ADDR_VEHICLE_RUN_STATUS);
 
-    //    uint8_t ucFWCheckedDate = 0;
-    //    vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_FW_CHECKED_DATE, &ucFWCheckedDate, 1);
+    // uint8_t ucFWCheckedDate = 0;
+    // vEEPROM_eWriteBytes_Exe(EEPROM_ADDR_FW_CHECKED_DATE, &ucFWCheckedDate, 1);
     // FW Checked Date
     FTPData.ucFWCheckedDate = ucEEPROM_eReadByte_Exe(EEPROM_ADDR_FW_CHECKED_DATE);
 

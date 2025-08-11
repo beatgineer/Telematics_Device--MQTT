@@ -2,7 +2,7 @@
 //  * ADC.c
 //  *
 //  *  Created on: Mar 1, 2025
-//  *      Author: Brij.Z
+//  *      Author: B.Zaveri
 //  */
 
 // #include "ADC.h"

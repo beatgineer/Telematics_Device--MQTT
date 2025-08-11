@@ -2,17 +2,19 @@
  * CAN.c
  *
  *  Created on: Mar 2, 2025
- *      Author: Brij.Z
+ *      Author: B.Zaveri
  */
 #include "APP.h"
 #include "main.h"
 #include "CAN.h"
 #include "stm32g0xx_hal.h"
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-/*function prototype*/
+
+// ============================================================================
+// FUNCTION PROTOTYPE
+// ============================================================================
 static void MX_FDCAN1_Init(void);
 static void vCAN_iCANConfig(void);
 void vCAN_eInit(void);
@@ -36,27 +38,27 @@ static void vCAN_iReadBattErr9_Exe(void);
 static void vCAN_iReadContErr1_Exe(void);
 static void vCAN_iReadContErr2_Exe(void);
 
+// ============================================================================
+// Handles
+// ============================================================================
 FDCAN_HandleTypeDef hfdcan1;
-
-extern FDCAN_HandleTypeDef hfdcan1;
-
 FDCAN_FilterTypeDef sFilterConfig;
 FDCAN_TxHeaderTypeDef TxHeader;
 FDCAN_RxHeaderTypeDef RxHeader;
 FDCAN_RxHeaderTypeDef RxHeader1;
 
 //*****************************************************************************
-// INTERNAL VARIABLES
+// Structures
 //*****************************************************************************
-
 TsCAN CANData;
 TuCANStatus CANStatus;
 TsCell CELLData; // Rev 1.021 19-09-2024
 extern TsAPP APPStatus;
-
+//*****************************************************************************
+// Buffers
+//*****************************************************************************
 uint8_t ucCAN_eRxData[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t ucCAN_eTxData[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-// uint32_t ulFTP_eTxCANID;
 
 static void MX_FDCAN1_Init(void)
 {

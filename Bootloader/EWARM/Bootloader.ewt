@@ -1484,6 +1484,12 @@
                     <name>$PROJ_DIR$\..\Core\Inc\MCUFlash.h</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\MainProg\Core\Src\MQTT.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\MainProg\Core\Inc\MQTT.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\stm32g0xx_hal_msp.c</name>
                 </file>
                 <file>

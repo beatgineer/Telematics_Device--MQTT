@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-        TsOTAData		OTAData;
+//        TsOTAData		OTAData;
 extern	TsGSMStatus		GSMStatus;
 extern	TsGSMData		GSMData;
 extern	TsGPSData		GPSData;

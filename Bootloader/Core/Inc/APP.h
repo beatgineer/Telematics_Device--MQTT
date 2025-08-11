@@ -127,7 +127,7 @@ extern "C"
 // after MSGCOUNTER you can reserve more if needed up to your next block�
  
 // Firmware-update flags (keep these well apart from the config block)
-#define EEPROM_ADDR_FW_UPDATE_STATUS 0x300  // 1 byte
+#define EEPROM_ADDR_FW_UPDATE_STATUS 0x320  // 1 byte
 #define EEPROM_ADDR_FW_CHECKED_DATE  0x314  // 1 byte
 // #define EEPROM_ADDR_IMMOB_VER_NUM    0x0124  // 5 bytes [0x0124..0x0128]
 #define EEPROM_ADDR_IOT_VER_NUM      0x302  // 5 bytes [0x0129..0x012D]
@@ -142,6 +142,20 @@ extern "C"
 // #define EEPROM_ADDR_IOT_SMS_VER_NUM 0x030C   // 5 bytes [0x30C..0x310]
 // #define EEPROM_ADDR_IMMOB_SMS_VER_NUM 0x0311 // 5 bytes [0x311..0x315]
 // #define EEPROM_ADDR_SMS_SENDER_NUM 0x0316    // 25 bytes[0x316..0x32E]
+
+#pragma pack(push, 1)
+	typedef struct
+	{
+		char cIMEI[LEN_IMEINUM];
+		// char cAPN[LEN_APN];
+		// uint8_t ucIMEICCIDStatus; // Bit 0 : IMEI Status, Bit 1 : CCID Status
+		// char cDataServerIP[LEN_SERVERIP];
+		// char cDataServerPort[LEN_PORTNUM];
+		// char cCCID[LEN_CCID];
+		// uint8_t ucProtocol;
+	} TsAPP_eConfig;
+#pragma pack(pop)
+
 
 // Total size of the config block (up through MSGCOUNTER)
 #define TOTAL_CONFIG_SIZE ((EEPROM_ADDR_MSGCOUNTER + LEN_MSGCOUNTER) - EEPROM_ADDR_SIG)
