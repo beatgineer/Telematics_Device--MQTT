@@ -33,7 +33,7 @@ To DIAGNOSE vehicle :
 /==================================Reset Firmware-Checked Date=====================================================================/
 
 To UPDATE telematics device firmware : 
-		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m  "Reset_FWChkDate" -u RovoSync -P Yt7rt4hgTVhfY
+		 mosquitto_pub -h 13.235.101.231 -t "861736071467671" -m  "FWUpdate" -u RovoSync -P Yt7rt4hgTVhfY
 
 
 
